@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refer & Earn ₹5,000 | KalpDev Solar</title>
+    <meta name="description" content="Refer friends and family to KalpDev Solar and earn ₹5,000 for every successful installation. Join our referral program today.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="referral.css">
+</head>
+<body>
+
+    <!-- Navbar -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="index.html" class="logo"><img src="solarpanel india.png" alt="KalpDev Solar" class="logo-img"></a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="installation.html">Installation</a></li>
+                <li><a href="services.html">Services</a></li>
+                <li><a href="works.html">Our Works</a></li>
+                <li><a href="team.html">Team</a></li>
+                <li><a href="contact.html">Contact</a></li>
+                <li><a href="referral.html" class="active">Refer & Earn</a></li>
+            </ul>
+            <a href="https://wa.me/917350785606" class="btn btn-primary nav-cta" target="_blank" rel="noopener noreferrer">Get Free Quote</a>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle menu">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Page Hero -->
+    <section class="page-hero">
+        <div class="container">
+            <div class="page-hero-content">
+                <div class="hero-badge">💰 Earn With Solar</div>
+                <h1>Refer & Earn <span class="text-amber">₹5,000</span></h1>
+                <p>Share your unique referral code. When someone installs solar using your code and gets approved, you earn ₹5,000 cash reward.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag text-green">How It Works</div>
+                <h2>3 Simple Steps to Earn</h2>
+            </div>
+            <div class="referral-steps">
+                <div class="ref-step">
+                    <div class="ref-step-num">1</div>
+                    <div class="ref-step-icon">📝</div>
+                    <h3>Sign Up & Get Code</h3>
+                    <p>Register below and get your unique referral code instantly.</p>
+                </div>
+                <div class="ref-step-arrow">→</div>
+                <div class="ref-step">
+                    <div class="ref-step-num">2</div>
+                    <div class="ref-step-icon">📤</div>
+                    <h3>Share With Friends</h3>
+                    <p>Share your code with anyone interested in solar installation.</p>
+                </div>
+                <div class="ref-step-arrow">→</div>
+                <div class="ref-step">
+                    <div class="ref-step-num">3</div>
+                    <div class="ref-step-icon">💰</div>
+                    <h3>Earn ₹5,000</h3>
+                    <p>When their installation is approved by admin, you get ₹5,000!</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Auth Section - Login/Register -->
+    <section class="section bg-light" id="authSection">
+        <div class="container">
+            <div class="auth-container">
+                <!-- Login Form -->
+                <div class="auth-card" id="loginCard">
+                    <h2>Login to Dashboard</h2>
+                    <p>Access your referral dashboard and track earnings.</p>
+                    <form id="loginForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="loginPhone">Mobile Number</label>
+                            <input type="tel" id="loginPhone" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password</label>
+                            <input type="password" id="loginPassword" placeholder="Enter password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">Login →</button>
+                    </form>
+                    <p class="auth-switch">Don't have an account? <a href="#" id="showRegister">Register here</a></p>
+                </div>
+
+                <!-- Register Form -->
+                <div class="auth-card hidden" id="registerCard">
+                    <h2>Join Referral Program</h2>
+                    <p>Sign up and start earning ₹5,000 per referral.</p>
+                    <form id="registerForm" class="auth-form">
+                        <div class="form-group">
+                            <label for="regName">Full Name *</label>
+                            <input type="text" id="regName" placeholder="Your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regPhone">Mobile Number *</label>
+                            <input type="tel" id="regPhone" placeholder="10-digit mobile number" pattern="[0-9]{10}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regEmail">Email</label>
+                            <input type="email" id="regEmail" placeholder="your@email.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="regPassword">Create Password *</label>
+                            <input type="password" id="regPassword" placeholder="Min 6 characters" minlength="6" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="regUPI">UPI ID (for payments)</label>
+                            <input type="text" id="regUPI" placeholder="yourname@upi">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-lg btn-block">Register & Get Code →</button>
+                    </form>
+                    <p class="auth-switch">Already have an account? <a href="#" id="showLogin">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Dashboard (Hidden by default, shown after login) -->
+    <section class="section hidden" id="dashboardSection">
+        <div class="container">
+            <!-- Dashboard Header -->
+            <div class="dash-header">
+                <div class="dash-welcome">
+                    <h2>Welcome, <span id="dashUserName">User</span>! 👋</h2>
+                    <p>Your referral dashboard</p>
+                </div>
+                <button class="btn btn-outline" id="logoutBtn">Logout</button>
+            </div>
+
+            <!-- Referral Code Card -->
+            <div class="referral-code-card">
+                <div class="rcc-left">
+                    <h3>Your Referral Code</h3>
+                    <div class="referral-code" id="userReferralCode">KDS-XXXXX</div>
+                    <p>Share this code with friends & family</p>
+                </div>
+                <div class="rcc-right">
+                    <button class="btn btn-primary" id="copyCodeBtn">📋 Copy Code</button>
+                    <button class="btn btn-green" id="shareWhatsappBtn">💬 Share on WhatsApp</button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="dash-stats">
+                <div class="dash-stat-card">
+                    <div class="dsc-icon">📤</div>
+                    <div class="dsc-number" id="statReferrals">0</div>
+                    <div class="dsc-label">Total Referrals</div>
+                </div>
+                <div class="dash-stat-card">
+                    <div class="dsc-icon">⏳</div>
+                    <div class="dsc-number" id="statPending">0</div>
+                    <div class="dsc-label">Pending Approval</div>
+                </div>
+                <div class="dash-stat-card">
+                    <div class="dsc-icon">✅</div>
+                    <div class="dsc-number" id="statApproved">0</div>
+                    <div class="dsc-label">Approved</div>
+                </div>
+                <div class="dash-stat-card earnings">
+                    <div class="dsc-icon">💰</div>
+                    <div class="dsc-number" id="statEarnings">₹0</div>
+                    <div class="dsc-label">Total Earnings</div>
+                </div>
+            </div>
+
+            <!-- Referral History -->
+            <div class="dash-table-card">
+                <h3>Referral History</h3>
+                <div class="dash-table-wrap">
+                    <table class="dash-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Phone</th>
+                                <th>Date</th>
+                                <th>Status</th>
+                                <th>Reward</th>
+                            </tr>
+                        </thead>
+                        <tbody id="referralTableBody">
+                            <tr class="empty-row">
+                                <td colspan="5">No referrals yet. Share your code to start earning!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Share Section -->
+            <div class="dash-share-card">
+                <h3>Share & Earn More</h3>
+                <p>The more you share, the more you earn. Each approved referral = ₹5,000!</p>
+                <div class="share-message-box">
+                    <textarea id="shareMessage" rows="4" readonly></textarea>
+                    <button class="btn btn-outline" id="copyMessageBtn">📋 Copy Message</button>
+                </div>
+                <div class="share-buttons">
+                    <button class="btn btn-green" id="shareWA">💬 WhatsApp</button>
+                    <button class="btn btn-primary" id="shareSMS">📱 SMS</button>
+                    <button class="btn btn-outline" id="shareGeneral">📤 Share</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="referralCTA">
+        <div class="container">
+            <div class="cta-card">
+                <h2>Start Earning Today</h2>
+                <p>Join 100+ referral partners already earning with KalpDev Solar.</p>
+                <div class="cta-buttons">
+                    <a href="#authSection" class="btn btn-white btn-lg">Join Referral Program →</a>
+                    <a href="https://wa.me/917350785606?text=Hi%2C%20I%20want%20to%20know%20about%20the%20referral%20program" class="btn btn-green btn-lg" target="_blank" rel="noopener noreferrer">💬 Ask on WhatsApp</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-content">
+            <div class="footer-brand">
+                <div class="logo"><img src="solarpanel india.png" alt="KalpDev Solar" class="logo-img footer-logo-img"></div>
+                <p class="footer-tagline">Solar Panel India — Powered by KalpDev Solar</p>
+                <p>Premium rooftop solar solutions for homes, shops, societies & industries.</p>
+                <p class="footer-domain">🌐 solar-panel-india.com</p>
+            </div>
+            <div class="footer-links-group">
+                <h4>Pages</h4>
+                <ul>
+                    <li><a href="index.html">Home</a></li>
+                    <li><a href="installation.html">Installation</a></li>
+                    <li><a href="services.html">Services</a></li>
+                    <li><a href="works.html">Our Works</a></li>
+                    <li><a href="team.html">Team</a></li>
+                    <li><a href="contact.html">Contact</a></li>
+                    <li><a href="referral.html">Refer & Earn</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-group">
+                <h4>Service Areas</h4>
+                <ul>
+                    <li><a href="#">Pune City</a></li>
+                    <li><a href="#">Pimpri Chinchwad</a></li>
+                    <li><a href="#">Hinjewadi & Wakad</a></li>
+                    <li><a href="#">Baner & Kothrud</a></li>
+                </ul>
+            </div>
+            <div class="footer-links-group">
+                <h4>Contact</h4>
+                <ul>
+                    <li><a href="tel:+917350785606">📞 7350785606</a></li>
+                    <li><a href="https://wa.me/917350785606">💬 WhatsApp</a></li>
+                    <li><a href="mailto:info@solar-panel-india.com">✉️ Email Us</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 KalpDev Solar | solar-panel-india.com</p>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/917350785606" class="whatsapp-float" target="_blank" rel="noopener noreferrer" aria-label="Chat on WhatsApp">💬 WhatsApp</a>
+    
+    <!-- Admin Access (hidden link) -->
+    <div style="text-align:center; padding: 10px; font-size: .75rem;">
+        <a href="admin.html" style="color: var(--neutral-400); text-decoration: none;">Admin Panel</a>
+    </div>
+
+    <script src="script.js"></script>
+    <script src="referral.js"></script>
+</body>
+</html>

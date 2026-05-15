@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel | KalpDev Solar</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="referral.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+    <!-- Admin Login (shown first) -->
+    <section class="admin-login-section" id="adminLoginSection">
+        <div class="container">
+            <div class="admin-login-card">
+                <div class="admin-login-header">
+                    <img src="solarpanel india.png" alt="KalpDev Solar" class="admin-logo">
+                    <h2>Admin Panel</h2>
+                    <p>Login to manage referrals and leads</p>
+                </div>
+                <form id="adminLoginForm" class="auth-form">
+                    <div class="form-group">
+                        <label for="adminUser">Admin Username</label>
+                        <input type="text" id="adminUser" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPass">Admin Password</label>
+                        <input type="password" id="adminPass" placeholder="Enter password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg btn-block">Login to Admin →</button>
+                </form>
+                <p class="admin-hint">Default: admin / kalpdev@2025</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admin Dashboard (hidden until login) -->
+    <section class="admin-dashboard hidden" id="adminDashboard">
+        <!-- Admin Header -->
+        <div class="admin-topbar">
+            <div class="container admin-topbar-inner">
+                <div class="admin-topbar-left">
+                    <img src="solarpanel india.png" alt="KalpDev Solar" class="admin-logo-small">
+                    <h3>Admin Panel</h3>
+                </div>
+                <button class="btn btn-outline" id="adminLogoutBtn">Logout</button>
+            </div>
+        </div>
+
+        <div class="container admin-content">
+            <!-- Admin Stats -->
+            <div class="admin-stats">
+                <div class="admin-stat-card">
+                    <div class="asc-icon">👥</div>
+                    <div class="asc-number" id="adminTotalUsers">0</div>
+                    <div class="asc-label">Registered Users</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="asc-icon">📤</div>
+                    <div class="asc-number" id="adminTotalLeads">0</div>
+                    <div class="asc-label">Total Referral Leads</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="asc-icon">⏳</div>
+                    <div class="asc-number" id="adminPendingLeads">0</div>
+                    <div class="asc-label">Pending Approval</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="asc-icon">✅</div>
+                    <div class="asc-number" id="adminApprovedLeads">0</div>
+                    <div class="asc-label">Approved</div>
+                </div>
+                <div class="admin-stat-card">
+                    <div class="asc-icon">💰</div>
+                    <div class="asc-number" id="adminTotalPayout">₹0</div>
+                    <div class="asc-label">Total Payout</div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="admin-tabs">
+                <button class="admin-tab active" data-tab="leads">📋 Referral Leads</button>
+                <button class="admin-tab" data-tab="users">👥 Registered Users</button>
+            </div>
+
+            <!-- Referral Leads Tab -->
+            <div class="admin-tab-content active" id="tab-leads">
+                <div class="admin-table-card">
+                    <div class="admin-table-header">
+                        <h3>Referral Leads</h3>
+                        <div class="admin-filter">
+                            <select id="filterStatus">
+                                <option value="all">All Status</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="dash-table-wrap">
+                        <table class="dash-table">
+                            <thead>
+                                <tr>
+                                    <th>Lead Name</th>
+                                    <th>Phone</th>
+                                    <th>Area</th>
+                                    <th>Bill</th>
+                                    <th>Referral Code</th>
+                                    <th>Referred By</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminLeadsTable">
+                                <tr class="empty-row">
+                                    <td colspan="9">No referral leads yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users Tab -->
+            <div class="admin-tab-content" id="tab-users">
+                <div class="admin-table-card">
+                    <div class="admin-table-header">
+                        <h3>Registered Referral Users</h3>
+                    </div>
+                    <div class="dash-table-wrap">
+                        <table class="dash-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Referral Code</th>
+                                    <th>UPI ID</th>
+                                    <th>Referrals</th>
+                                    <th>Approved</th>
+                                    <th>Earnings</th>
+                                    <th>Joined</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminUsersTable">
+                                <tr class="empty-row">
+                                    <td colspan="9">No registered users yet.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="admin.js"></script>
+</body>
+</html>
