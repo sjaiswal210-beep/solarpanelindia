@@ -70,14 +70,14 @@ function hidePopup() {
     }
 }
 
-// Show popup after 3 seconds on page load
+// Show popup after 15 seconds on page load
 if (popupOverlay) {
     setTimeout(() => {
         // Only show if not already dismissed this session
         if (!sessionStorage.getItem('popupDismissed')) {
             showPopup();
         }
-    }, 3000);
+    }, 10000);
 
     // Exit-intent popup (desktop only)
     document.addEventListener('mouseout', (e) => {
