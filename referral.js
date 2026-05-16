@@ -23,6 +23,30 @@ function saveToSheet(data) {
 }
 
 // ===== UTILITY FUNCTIONS =====
+
+// Success notification toast
+function showSuccessNotification(message) {
+    // Remove existing notification if any
+    const existing = document.querySelector('.referral-toast');
+    if (existing) existing.remove();
+
+    const toast = document.createElement('div');
+    toast.className = 'referral-toast';
+    toast.innerHTML = `<span class="referral-toast-icon">✅</span> ${message}`;
+    document.body.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => {
+        toast.classList.add('show');
+    });
+
+    // Auto-remove after 3 seconds
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+    }, 3000);
+}
+
 function getUsers() {
     return JSON.parse(localStorage.getItem(REFERRAL_DB_KEY) || '[]');
 }
@@ -96,7 +120,7 @@ if (registerForm) {
         e.preventDefault();
         const name = document.getElementById('regName').value.trim();
         const phone = document.getElementById('regPhone').value.trim();
-        const email = document.getElementById('regEmail').value.trim();
+        const location = document.getElementById('regLocation').value;
         const password = document.getElementById('regPassword').value;
         const upi = document.getElementById('regUPI').value.trim();
 
@@ -120,7 +144,7 @@ if (registerForm) {
         const newUser = {
             name,
             phone,
-            email,
+            location,
             password,
             upi,
             referralCode,
@@ -137,13 +161,13 @@ if (registerForm) {
             action: 'register_referral',
             name: name,
             phone: phone,
-            email: email,
+            location: location,
             password: password,
             upi: upi,
             referralCode: referralCode
         });
 
-        alert(`Registration successful! Your referral code is: ${referralCode}`);
+        showSuccessNotification(`Registration successful! Your code: ${referralCode}`);
         showDashboard();
     });
 }
@@ -169,6 +193,7 @@ if (loginForm) {
         }
 
         setCurrentUser(phone);
+        showSuccessNotification(`Welcome back, ${user.name.split(' ')[0]}! 🎉`);
         showDashboard();
     });
 }
@@ -183,10 +208,21 @@ if (logoutBtn) {
 
 // ===== SHOW/HIDE SECTIONS =====
 function showDashboard() {
+    // Hide auth section and other pre-login content
     if (authSection) authSection.classList.add('hidden');
     if (dashboardSection) dashboardSection.classList.remove('hidden');
     if (referralCTA) referralCTA.classList.add('hidden');
+
+    // Hide the "How It Works" steps section when logged in
+    const stepsSection = document.querySelector('.referral-steps')?.closest('.section');
+    if (stepsSection) stepsSection.classList.add('hidden');
+
     updateDashboard();
+
+    // Scroll to dashboard smoothly
+    if (dashboardSection) {
+        dashboardSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 function showAuth() {
@@ -195,6 +231,10 @@ function showAuth() {
     if (referralCTA) referralCTA.classList.remove('hidden');
     if (loginCard) loginCard.classList.remove('hidden');
     if (registerCard) registerCard.classList.add('hidden');
+
+    // Show the "How It Works" steps section when logged out
+    const stepsSection = document.querySelector('.referral-steps')?.closest('.section');
+    if (stepsSection) stepsSection.classList.remove('hidden');
 }
 
 // ===== UPDATE DASHBOARD =====

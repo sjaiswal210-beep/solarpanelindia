@@ -78,6 +78,13 @@ if (popupOverlay) {
             showPopup();
         }
     }, 3000);
+
+    // Exit-intent popup (desktop only)
+    document.addEventListener('mouseout', (e) => {
+        if (e.clientY <= 0 && !sessionStorage.getItem('popupDismissed')) {
+            showPopup();
+        }
+    });
 }
 
 if (popupClose) {
@@ -114,10 +121,10 @@ if (popupForm) {
             name: name,
             phone: phone,
             source: 'popup_coupon',
-            message: '₹20,000 OFF Coupon Request'
+            message: 'Solar setup ₹92,000 offer enquiry'
         });
 
-        const msg = `Hi! I want to claim the ₹20,000 OFF coupon on solar installation.\n\nName: ${name}\nPhone: ${phone}`;
+        const msg = `Hi! I'm interested in the complete solar setup at ₹92,000 offer.\n\nName: ${name}\nPhone: ${phone}`;
         const whatsappUrl = `https://wa.me/917350785606?text=${encodeURIComponent(msg)}`;
 
         hidePopup();
@@ -276,9 +283,18 @@ if (contactForm) {
         if (data.message) msg += `Message: ${data.message}\n`;
 
         const whatsappUrl = `https://wa.me/917350785606?text=${encodeURIComponent(msg)}`;
-        alert('Thank you! Redirecting to WhatsApp for instant response...');
-        window.open(whatsappUrl, '_blank');
-        contactForm.reset();
+        
+        // Show success message on page
+        const successDiv = document.createElement('div');
+        successDiv.className = 'form-success-message';
+        successDiv.innerHTML = `✅ Thank you, ${data.name || 'friend'}! Your request has been submitted.<p>Our solar expert will call you within 30 minutes. You can also chat on WhatsApp for instant response.</p>`;
+        contactForm.parentNode.insertBefore(successDiv, contactForm);
+        contactForm.style.display = 'none';
+
+        // Also open WhatsApp
+        setTimeout(() => {
+            window.open(whatsappUrl, '_blank');
+        }, 1000);
     });
 }
 
@@ -432,4 +448,41 @@ if (worksStats) {
         });
     }, { threshold: 0.5 });
     wsObserver.observe(worksStats);
+}
+
+
+// ===== MINI LEAD FORM (on Installation, Works, Team pages) =====
+const miniLeadForm = document.getElementById('miniLeadForm');
+if (miniLeadForm) {
+    miniLeadForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const formData = new FormData(miniLeadForm);
+        const name = formData.get('name');
+        const phone = formData.get('phone');
+
+        if (!/^[0-9]{10}$/.test(phone)) {
+            alert('Please enter a valid 10-digit mobile number');
+            return;
+        }
+
+        // Save to Google Sheet
+        saveToGoogleSheet({
+            name: name,
+            phone: phone,
+            source: 'mini_form_' + window.location.pathname.replace(/[^a-z]/g, ''),
+            message: 'Quick quote request'
+        });
+
+        // Show success message
+        const successDiv = document.createElement('div');
+        successDiv.className = 'form-success-message';
+        successDiv.innerHTML = `✅ Thank you, ${name}! Our expert will call you within 30 minutes.<p>You can also WhatsApp us at 7350785606 for instant response.</p>`;
+        miniLeadForm.parentNode.replaceChild(successDiv, miniLeadForm);
+
+        // Open WhatsApp as backup
+        const msg = `Hi! I'm interested in rooftop solar installation.\n\nName: ${name}\nPhone: ${phone}`;
+        setTimeout(() => {
+            window.open(`https://wa.me/917350785606?text=${encodeURIComponent(msg)}`, '_blank');
+        }, 1500);
+    });
 }
