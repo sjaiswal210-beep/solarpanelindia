@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kalpdev Solar | Customer Bill Analysis</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☀️</text></svg>">
+<style>
+:root{--bg:#0d1117;--card:#161b22;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--orange:#ff8c00;--green:#3fb950;--blue:#58a6ff;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;}
+.topbar{background:#000;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;}
+.search-bar{display:flex;align-items:center;gap:8px;}
+.search-bar input{background:#21262d;border:1px solid var(--border);color:var(--text);padding:7px 14px;border-radius:8px;font-size:0.85em;width:220px;outline:none;}
+.search-bar input:focus{border-color:var(--orange);}
+.search-bar input::placeholder{color:#484f58;}
+.upload-btn{background:var(--orange);color:#fff;border:none;padding:7px 14px;border-radius:8px;font-size:0.85em;font-weight:600;cursor:pointer;transition:background 0.2s;}
+.upload-btn:hover{background:#e07800;}
+.topbar .logo{color:var(--orange);font-weight:700;font-size:1.1em;}
+.topbar .site{color:var(--muted);font-size:0.85em;}
+.container{max-width:1400px;margin:0 auto;padding:20px;}
+.header{text-align:center;padding:25px;background:linear-gradient(135deg,#1a1a2e,#16213e);border:1px solid var(--border);border-radius:14px;margin-bottom:20px;}
+.header h1{font-size:1.7em;color:var(--orange);}
+.header p{color:var(--muted);font-size:0.88em;margin-top:4px;}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-bottom:20px;}
+.kpi{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;text-align:center;}
+.kpi .v{font-size:1.5em;font-weight:700;color:var(--orange);}
+.kpi .l{font-size:0.72em;color:var(--muted);text-transform:uppercase;margin-top:3px;}
+.kpi.g .v{color:var(--green);} .kpi.b .v{color:var(--blue);} .kpi.ytd .v{color:#ffd700;}
+
+.panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px;}
+.panel h2{font-size:1.15em;color:var(--orange);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);}
+
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:0.82em;}
+th{background:#21262d;color:var(--orange);padding:10px 8px;text-align:left;font-weight:600;position:sticky;top:0;}
+td{padding:8px;border-bottom:1px solid #21262d;}
+.r{text-align:right;} .mono{font-family:monospace;font-size:0.88em;}
+.amt{font-weight:600;}
+.row-click{cursor:pointer;transition:background 0.2s;}
+.row-click:hover{background:rgba(255,140,0,0.06);}
+.ytd-amt{color:#ffd700;font-weight:700;}
+.ytd-color{color:#ffd700 !important;}
+
+#detail-view{display:none;}
+.back-btn{background:#21262d;color:var(--blue);border:1px solid var(--border);padding:8px 18px;border-radius:8px;cursor:pointer;font-size:0.9em;margin-bottom:15px;}
+.back-btn:hover{background:#30363d;}
+.cust-h h2{color:var(--orange);font-size:1.5em;}
+.cust-h .sub{color:var(--muted);font-size:0.88em;margin-top:3px;}
+
+.info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:18px 0;}
+.ib{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;}
+.ib .lbl{font-size:0.7em;color:var(--muted);text-transform:uppercase;}
+.ib .val{font-size:1.25em;font-weight:700;margin-top:2px;}
+.ib .val.o{color:var(--orange);} .ib .val.g{color:var(--green);} .ib .val.b{color:var(--blue);}
+
+.meter-block{background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:12px;overflow:hidden;}
+.meter-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#21262d;flex-wrap:wrap;}
+.meter-hdr .badge{background:var(--orange);color:#fff;padding:2px 9px;border-radius:10px;font-size:0.7em;font-weight:700;}
+.meter-hdr .cno{font-family:monospace;color:var(--blue);font-size:0.88em;}
+.meter-hdr .typ{color:var(--muted);font-size:0.8em;}
+.meter-body{padding:12px 14px;}
+.meter-stats{display:flex;gap:18px;flex-wrap:wrap;}
+.ms .ms-l{font-size:0.7em;color:var(--muted);} .ms .ms-v{font-size:1.05em;font-weight:600;}
+
+.hist-title{font-size:0.9em;color:var(--blue);margin:14px 0 8px;}
+.hr{display:flex;align-items:center;gap:6px;margin-bottom:4px;}
+.hr .mo{width:50px;font-size:0.72em;color:var(--muted);text-align:right;}
+.hr .track{flex:1;height:20px;background:#21262d;border-radius:10px;overflow:hidden;}
+.hr .fill{height:100%;background:linear-gradient(90deg,#1f6feb,#58a6ff);border-radius:10px;display:flex;align-items:center;padding-left:8px;font-size:0.68em;color:#fff;font-weight:600;}
+.hr .uval{width:70px;font-size:0.73em;color:var(--blue);font-weight:600;text-align:right;}
+
+.note{background:rgba(255,140,0,0.04);border:1px solid rgba(255,140,0,0.15);border-radius:8px;padding:12px;margin-top:15px;font-size:0.82em;color:var(--muted);}
+
+.solar-rec{margin-top:25px;background:linear-gradient(135deg,rgba(63,185,80,0.05),rgba(255,215,0,0.03));border:2px solid rgba(63,185,80,0.3);border-radius:14px;overflow:hidden;}
+.solar-rec-header{background:linear-gradient(135deg,#1a3a1a,#0d2818);padding:18px 20px;border-bottom:1px solid rgba(63,185,80,0.2);}
+.solar-rec-header h3{color:#3fb950;font-size:1.2em;}
+.solar-rec-header p{color:var(--muted);font-size:0.85em;margin-top:3px;}
+.solar-rec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;padding:18px 20px;}
+.sr-item{background:rgba(0,0,0,0.3);border-radius:8px;padding:12px;text-align:center;}
+.sr-label{font-size:0.7em;color:var(--muted);text-transform:uppercase;}
+.sr-value{font-size:1.2em;font-weight:700;color:#fff;margin-top:3px;}
+.solar-savings-box{padding:18px 20px;border-top:1px solid rgba(63,185,80,0.15);}
+.ssb-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px;}
+.ssb-item{text-align:center;padding:12px;background:rgba(0,0,0,0.2);border-radius:8px;}
+.ssb-label{font-size:0.78em;color:var(--muted);}
+.ssb-value{font-size:1.4em;font-weight:700;margin-top:4px;}
+.solar-benefits{padding:15px 20px;border-top:1px solid rgba(63,185,80,0.15);}
+.solar-benefits h4{color:#3fb950;margin-bottom:8px;font-size:0.95em;}
+.solar-benefits ul{list-style:none;padding:0;}
+.solar-benefits li{padding:4px 0;font-size:0.85em;color:var(--muted);}
+.solar-benefits li::before{content:'\2714\0020';color:#3fb950;}
+.solar-cta{padding:15px 20px;background:rgba(63,185,80,0.08);text-align:center;border-top:1px solid rgba(63,185,80,0.2);}
+.solar-cta p{font-size:0.9em;color:var(--muted);}
+.solar-cta p:first-child{color:#3fb950;font-size:1.05em;}
+.footer{text-align:center;padding:20px;color:#484f58;font-size:0.78em;border-top:1px solid var(--border);margin-top:25px;}
+
+.upload-panel{border:1px solid rgba(88,166,255,0.3);}
+.upload-box{border:2px dashed var(--border);border-radius:12px;padding:30px;text-align:center;cursor:pointer;transition:border-color 0.3s,background 0.3s;}
+.upload-box:hover{border-color:var(--orange);background:rgba(255,140,0,0.03);}
+.upload-icon{font-size:2.5em;color:var(--orange);margin-bottom:8px;}
+.upload-box p{color:var(--muted);font-size:0.9em;}
+.progress-bar{height:6px;background:#21262d;border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--orange),#ffd700);border-radius:3px;transition:width 0.3s;width:0%;}
+.upload-result-card{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:10px;}
+</style>
+</head>
+<body>
+<div class="topbar">
+    <span class="logo">Kalpdev Solar</span>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="Search customer name..." onkeyup="searchCustomer()" />
+        <button class="upload-btn" onclick="document.getElementById('uploadPanel').style.display = document.getElementById('uploadPanel').style.display==='none'?'block':'none';">Upload Bill</button>
+    </div>
+    <span class="site">solar-panel-india.com</span>
+</div>
+<div class="container">
+<div class="header">
+    <h1>Kalpdev Solar</h1>
+    <p style="font-size:1.1em;color:#fff;margin-bottom:4px;">Customer Electricity Consumption Report</p>
+    <p>Wagholi, Pune 412207 | MSEDCL Hadapsar Division | Bill Month: May 2026</p>
+    <p style="margin-top:3px;font-size:0.8em;color:#484f58;">Scanned: 129 bills from 144 images (IMG_1181 to IMG_1336) | 18 May 2026</p>
+</div>
+
+<div class="kpis">
+    <div class="kpi"><div class="v">53</div><div class="l">Customers</div></div>
+    <div class="kpi b"><div class="v">129</div><div class="l">Bills Scanned</div></div>
+    <div class="kpi"><div class="v">&#8377;192,570</div><div class="l">Total May-26 Bill</div></div>
+    <div class="kpi g"><div class="v">113,873</div><div class="l">Total YTD Units</div></div>
+    <div class="kpi ytd"><div class="v">&#8377;1,463,000</div><div class="l">Total YTD Amount</div></div>
+</div>
+
+<div id="summary-view">
+
+<!-- Upload Section (hidden by default) -->
+<div class="panel upload-panel" id="uploadPanel" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <h2 style="margin-bottom:0;border:none;padding:0;">Upload New Customer Bill</h2>
+        <button class="back-btn" onclick="document.getElementById('uploadPanel').style.display='none'">Close</button>
+    </div>
+    <p style="color:var(--muted);font-size:0.85em;margin-bottom:12px;">Upload an electricity bill image (JPG/PNG) to instantly analyze and get solar recommendation</p>
+    <div class="upload-area" id="uploadArea">
+        <input type="file" id="billUpload" accept="image/*" onchange="handleUpload(event)" style="display:none;" />
+        <div class="upload-box" onclick="document.getElementById('billUpload').click()">
+            <div class="upload-icon">+</div>
+            <p>Click to upload bill image</p>
+            <p style="font-size:0.75em;color:#484f58;">or drag & drop here</p>
+        </div>
+    </div>
+    <div id="uploadProgress" style="display:none;margin-top:12px;">
+        <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+        <p id="progressText" style="font-size:0.8em;color:var(--muted);margin-top:6px;">Processing...</p>
+    </div>
+    <div id="uploadResult" style="display:none;margin-top:15px;"></div>
+</div>
+
+<div class="panel">
+    <h2>All Customers - Click row for detailed month-wise view</h2>
+    <div class="tbl-wrap">
+        <table>
+            <thead><tr>
+                <th>#</th><th>Customer Name</th><th>Consumer No(s)</th>
+                <th>Bills (May-26)</th><th>May Units</th><th>May Bill</th>
+                <th>YTD Units</th><th>YTD Amount</th><th>Months</th><th>Avg Units/Mo</th><th>Avg Amount/Mo</th>
+            </tr></thead>
+            <tbody><tr class="row-click" onclick="showCustomer(0)">
+            <td>1</td>
+            <td><strong>SUDHAKAR SHANKARRAO GADEKAR</strong></td>
+            <td class="mono">170521554765, 170521554773 +9</td>
+            <td class="r">11</td>
+            <td class="r">2803</td>
+            <td class="r amt">₹18,600</td>
+            <td class="r">10,855</td>
+            <td class="r amt ytd-amt">₹72,031</td>
+            <td class="r">12</td>
+            <td class="r">905</td>
+            <td class="r amt">₹6,003</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(1)">
+            <td>2</td>
+            <td><strong>KASHINATH APPARAO HIRMUKHE</strong></td>
+            <td class="mono">170521388741, 170521553483 +1</td>
+            <td class="r">3</td>
+            <td class="r">390</td>
+            <td class="r amt">₹13,610</td>
+            <td class="r">1,843</td>
+            <td class="r amt ytd-amt">₹64,316</td>
+            <td class="r">12</td>
+            <td class="r">154</td>
+            <td class="r amt">₹5,360</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(2)">
+            <td>3</td>
+            <td><strong>SHILPA SANDIP SATAV</strong></td>
+            <td class="mono">170524551953, 170524551961 +10</td>
+            <td class="r">12</td>
+            <td class="r">2415</td>
+            <td class="r amt">₹11,770</td>
+            <td class="r">6,709</td>
+            <td class="r amt ytd-amt">₹32,698</td>
+            <td class="r">12</td>
+            <td class="r">559</td>
+            <td class="r amt">₹2,725</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(3)">
+            <td>4</td>
+            <td><strong>PANDURANG DNYANDEV DEVKATE</strong></td>
+            <td class="mono">170524522635, 170524594105 +4</td>
+            <td class="r">6</td>
+            <td class="r">580</td>
+            <td class="r amt">₹11,400</td>
+            <td class="r">7,285</td>
+            <td class="r amt ytd-amt">₹143,188</td>
+            <td class="r">12</td>
+            <td class="r">607</td>
+            <td class="r amt">₹11,932</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(4)">
+            <td>5</td>
+            <td><strong>SUNIL SHIVAJIRAO BHOITE</strong></td>
+            <td class="mono">170521591440, 170521720151 +4</td>
+            <td class="r">6</td>
+            <td class="r">567</td>
+            <td class="r amt">₹8,680</td>
+            <td class="r">2,107</td>
+            <td class="r amt ytd-amt">₹32,255</td>
+            <td class="r">12</td>
+            <td class="r">176</td>
+            <td class="r amt">₹2,688</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(5)">
+            <td>6</td>
+            <td><strong>PRAKASH ASARAJI DAHIFALE</strong></td>
+            <td class="mono">170524535168, 170524577448 +2</td>
+            <td class="r">4</td>
+            <td class="r">2281</td>
+            <td class="r amt">₹7,280</td>
+            <td class="r">1,880</td>
+            <td class="r amt ytd-amt">₹6,000</td>
+            <td class="r">12</td>
+            <td class="r">157</td>
+            <td class="r amt">₹500</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(6)">
+            <td>7</td>
+            <td><strong>SUDHAKAR SHANKARRAO</strong></td>
+            <td class="mono">170521554811, 170521554862 +1</td>
+            <td class="r">3</td>
+            <td class="r">2110</td>
+            <td class="r amt">₹7,050</td>
+            <td class="r">3,139</td>
+            <td class="r amt ytd-amt">₹10,488</td>
+            <td class="r">12</td>
+            <td class="r">262</td>
+            <td class="r amt">₹874</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(7)">
+            <td>8</td>
+            <td><strong>PANKAJ KUMAR</strong></td>
+            <td class="mono">170521473161, 170521473170 +3</td>
+            <td class="r">5</td>
+            <td class="r">613</td>
+            <td class="r amt">₹6,980</td>
+            <td class="r">5,088</td>
+            <td class="r amt ytd-amt">₹57,935</td>
+            <td class="r">12</td>
+            <td class="r">424</td>
+            <td class="r amt">₹4,828</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(8)">
+            <td>9</td>
+            <td><strong>MANGESH DATTATRAY JOSHI</strong></td>
+            <td class="mono">170521451974, 170521451982 +5</td>
+            <td class="r">7</td>
+            <td class="r">675</td>
+            <td class="r amt">₹6,650</td>
+            <td class="r">8,264</td>
+            <td class="r amt ytd-amt">₹81,416</td>
+            <td class="r">12</td>
+            <td class="r">689</td>
+            <td class="r amt">₹6,785</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(9)">
+            <td>10</td>
+            <td><strong>AMOL VIJAYKUMAR JALAN</strong></td>
+            <td class="mono">170521407941, 170521437769</td>
+            <td class="r">2</td>
+            <td class="r">532</td>
+            <td class="r amt">₹6,570</td>
+            <td class="r">2,874</td>
+            <td class="r amt ytd-amt">₹35,493</td>
+            <td class="r">11</td>
+            <td class="r">261</td>
+            <td class="r amt">₹3,227</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(10)">
+            <td>11</td>
+            <td><strong>PANKAJ RAJENDRA KAKAD</strong></td>
+            <td class="mono">170524606782</td>
+            <td class="r">1</td>
+            <td class="r">245</td>
+            <td class="r amt">₹5,680</td>
+            <td class="r">1,338</td>
+            <td class="r amt ytd-amt">₹31,020</td>
+            <td class="r">12</td>
+            <td class="r">112</td>
+            <td class="r amt">₹2,585</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(11)">
+            <td>12</td>
+            <td><strong>SONALI MININATH LAWANDE</strong></td>
+            <td class="mono">170521456844, 170521456852</td>
+            <td class="r">2</td>
+            <td class="r">406</td>
+            <td class="r amt">₹5,020</td>
+            <td class="r">4,993</td>
+            <td class="r amt ytd-amt">₹61,736</td>
+            <td class="r">12</td>
+            <td class="r">416</td>
+            <td class="r amt">₹5,145</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(12)">
+            <td>13</td>
+            <td><strong>KASHINATH SAHEBRAO DHAKANE</strong></td>
+            <td class="mono">170524535133, 170524577405 +2</td>
+            <td class="r">4</td>
+            <td class="r">343</td>
+            <td class="r amt">₹4,820</td>
+            <td class="r">3,174</td>
+            <td class="r amt ytd-amt">₹44,603</td>
+            <td class="r">12</td>
+            <td class="r">264</td>
+            <td class="r amt">₹3,717</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(13)">
+            <td>14</td>
+            <td><strong>NAMDEO ANANDRAO GAWALI</strong></td>
+            <td class="mono">170524551902, 170524551911 +5</td>
+            <td class="r">7</td>
+            <td class="r">2334</td>
+            <td class="r amt">₹4,770</td>
+            <td class="r">4,520</td>
+            <td class="r amt ytd-amt">₹9,238</td>
+            <td class="r">12</td>
+            <td class="r">377</td>
+            <td class="r amt">₹770</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(14)">
+            <td>15</td>
+            <td><strong>BHAGWAN SUDAM KARALE</strong></td>
+            <td class="mono">170524535141, 170524594377 +2</td>
+            <td class="r">4</td>
+            <td class="r">302</td>
+            <td class="r amt">₹4,330</td>
+            <td class="r">3,243</td>
+            <td class="r amt ytd-amt">₹46,497</td>
+            <td class="r">12</td>
+            <td class="r">270</td>
+            <td class="r amt">₹3,875</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(15)">
+            <td>16</td>
+            <td><strong>SWARN RESIDENCY COMMON</strong></td>
+            <td class="mono">170521447047</td>
+            <td class="r">1</td>
+            <td class="r">275</td>
+            <td class="r amt">₹3,780</td>
+            <td class="r">3,252</td>
+            <td class="r amt ytd-amt">₹44,700</td>
+            <td class="r">12</td>
+            <td class="r">271</td>
+            <td class="r amt">₹3,725</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(16)">
+            <td>17</td>
+            <td><strong>AL PARDESHI</strong></td>
+            <td class="mono">170521462283</td>
+            <td class="r">1</td>
+            <td class="r">282</td>
+            <td class="r amt">₹3,530</td>
+            <td class="r">2,706</td>
+            <td class="r amt ytd-amt">₹33,873</td>
+            <td class="r">12</td>
+            <td class="r">226</td>
+            <td class="r amt">₹2,823</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(17)">
+            <td>18</td>
+            <td><strong>NARENDRA KHUSHAL BORDE</strong></td>
+            <td class="mono">170524606804</td>
+            <td class="r">1</td>
+            <td class="r">273</td>
+            <td class="r amt">₹3,390</td>
+            <td class="r">273</td>
+            <td class="r amt ytd-amt">₹3,390</td>
+            <td class="r">1</td>
+            <td class="r">273</td>
+            <td class="r amt">₹3,390</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(18)">
+            <td>19</td>
+            <td><strong>SUDHIR PRABHAKAR MANGALE</strong></td>
+            <td class="mono">170521447012</td>
+            <td class="r">1</td>
+            <td class="r">121</td>
+            <td class="r amt">₹3,200</td>
+            <td class="r">1,216</td>
+            <td class="r amt ytd-amt">₹32,159</td>
+            <td class="r">9</td>
+            <td class="r">135</td>
+            <td class="r amt">₹3,573</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(19)">
+            <td>20</td>
+            <td><strong>RAVINANDAN KAMALAKAR KULKARNI</strong></td>
+            <td class="mono">170521413070</td>
+            <td class="r">1</td>
+            <td class="r">251</td>
+            <td class="r amt">₹3,090</td>
+            <td class="r">251</td>
+            <td class="r amt ytd-amt">₹3,090</td>
+            <td class="r">1</td>
+            <td class="r">251</td>
+            <td class="r amt">₹3,090</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(20)">
+            <td>21</td>
+            <td><strong>SANDESH ARJUN NANDE</strong></td>
+            <td class="mono">170521701458</td>
+            <td class="r">1</td>
+            <td class="r">502</td>
+            <td class="r amt">₹3,010</td>
+            <td class="r">502</td>
+            <td class="r amt ytd-amt">₹3,010</td>
+            <td class="r">1</td>
+            <td class="r">502</td>
+            <td class="r amt">₹3,010</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(21)">
+            <td>22</td>
+            <td><strong>ASHWINI PANDURANG NANEKAR</strong></td>
+            <td class="mono">170521444862</td>
+            <td class="r">1</td>
+            <td class="r">243</td>
+            <td class="r amt">₹2,970</td>
+            <td class="r">1,343</td>
+            <td class="r amt ytd-amt">₹16,414</td>
+            <td class="r">7</td>
+            <td class="r">192</td>
+            <td class="r amt">₹2,345</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(22)">
+            <td>23</td>
+            <td><strong>RAJESH RAMAN HETKALE</strong></td>
+            <td class="mono">170524519651, 170524606812</td>
+            <td class="r">2</td>
+            <td class="r">202</td>
+            <td class="r amt">₹2,870</td>
+            <td class="r">1,086</td>
+            <td class="r amt ytd-amt">₹15,430</td>
+            <td class="r">12</td>
+            <td class="r">90</td>
+            <td class="r amt">₹1,286</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(23)">
+            <td>24</td>
+            <td><strong>SHREE RESIDENCY SHREE RESIDENCY SHREE RESIDENCY</strong></td>
+            <td class="mono">170524580538</td>
+            <td class="r">1</td>
+            <td class="r">209</td>
+            <td class="r amt">₹2,810</td>
+            <td class="r">209</td>
+            <td class="r amt ytd-amt">₹2,810</td>
+            <td class="r">1</td>
+            <td class="r">209</td>
+            <td class="r amt">₹2,810</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(24)">
+            <td>25</td>
+            <td><strong>PRAMILA KASHINATH DHAKANE</strong></td>
+            <td class="mono">170524577383, 170524577391 +1</td>
+            <td class="r">3</td>
+            <td class="r">293</td>
+            <td class="r amt">₹2,780</td>
+            <td class="r">2,790</td>
+            <td class="r amt ytd-amt">₹26,472</td>
+            <td class="r">9</td>
+            <td class="r">310</td>
+            <td class="r amt">₹2,941</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(25)">
+            <td>26</td>
+            <td><strong>USHA ANNASAHEB KALE</strong></td>
+            <td class="mono">170524535150, 170524607517</td>
+            <td class="r">2</td>
+            <td class="r">116</td>
+            <td class="r amt">₹2,760</td>
+            <td class="r">691</td>
+            <td class="r amt ytd-amt">₹16,441</td>
+            <td class="r">12</td>
+            <td class="r">58</td>
+            <td class="r amt">₹1,370</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(26)">
+            <td>27</td>
+            <td><strong>KHARWADE SHANTANU UDDHUAVRAO</strong></td>
+            <td class="mono">170521652139</td>
+            <td class="r">1</td>
+            <td class="r">2026</td>
+            <td class="r amt">₹2,750</td>
+            <td class="r">18</td>
+            <td class="r amt ytd-amt">₹24</td>
+            <td class="r">2</td>
+            <td class="r">9</td>
+            <td class="r amt">₹12</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(27)">
+            <td>28</td>
+            <td><strong>MININATH BHAURAO LAWANDE</strong></td>
+            <td class="mono">170521421943, 170521456861</td>
+            <td class="r">2</td>
+            <td class="r">117</td>
+            <td class="r amt">₹2,720</td>
+            <td class="r">1,496</td>
+            <td class="r amt ytd-amt">₹34,779</td>
+            <td class="r">12</td>
+            <td class="r">125</td>
+            <td class="r amt">₹2,898</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(28)">
+            <td>29</td>
+            <td><strong>ARCHANA PRAKASH DAHIFALE</strong></td>
+            <td class="mono">170524577472, 170524577481 +1</td>
+            <td class="r">3</td>
+            <td class="r">208</td>
+            <td class="r amt">₹2,670</td>
+            <td class="r">5,523</td>
+            <td class="r amt ytd-amt">₹70,896</td>
+            <td class="r">12</td>
+            <td class="r">460</td>
+            <td class="r amt">₹5,908</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(29)">
+            <td>30</td>
+            <td><strong>S P MANGALE S A DUNDE</strong></td>
+            <td class="mono">170521446911</td>
+            <td class="r">1</td>
+            <td class="r">141</td>
+            <td class="r amt">₹2,480</td>
+            <td class="r">762</td>
+            <td class="r amt ytd-amt">₹13,403</td>
+            <td class="r">12</td>
+            <td class="r">64</td>
+            <td class="r amt">₹1,117</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(30)">
+            <td>31</td>
+            <td><strong>RUPALI BHARAT SONAJE</strong></td>
+            <td class="mono">170521446938</td>
+            <td class="r">1</td>
+            <td class="r">131</td>
+            <td class="r amt">₹2,270</td>
+            <td class="r">917</td>
+            <td class="r amt ytd-amt">₹15,890</td>
+            <td class="r">12</td>
+            <td class="r">76</td>
+            <td class="r amt">₹1,324</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(31)">
+            <td>32</td>
+            <td><strong>DHIRAJ SHARAD KADAM</strong></td>
+            <td class="mono">170521414459, 170521606471 +2</td>
+            <td class="r">4</td>
+            <td class="r">1760</td>
+            <td class="r amt">₹2,060</td>
+            <td class="r">1,633</td>
+            <td class="r amt ytd-amt">₹1,911</td>
+            <td class="r">12</td>
+            <td class="r">136</td>
+            <td class="r amt">₹159</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(32)">
+            <td>33</td>
+            <td><strong>HEMA MANIK SHINDE</strong></td>
+            <td class="mono">170521444854</td>
+            <td class="r">1</td>
+            <td class="r">177</td>
+            <td class="r amt">₹1,970</td>
+            <td class="r">177</td>
+            <td class="r amt ytd-amt">₹1,970</td>
+            <td class="r">1</td>
+            <td class="r">177</td>
+            <td class="r amt">₹1,970</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(33)">
+            <td>34</td>
+            <td><strong>USHA GOPINATH KALE</strong></td>
+            <td class="mono">170524604160</td>
+            <td class="r">1</td>
+            <td class="r">149</td>
+            <td class="r amt">₹1,520</td>
+            <td class="r">1,133</td>
+            <td class="r amt ytd-amt">₹11,558</td>
+            <td class="r">12</td>
+            <td class="r">94</td>
+            <td class="r amt">₹963</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(34)">
+            <td>35</td>
+            <td><strong>VINAYAK ARUN GORADE</strong></td>
+            <td class="mono">170521444897</td>
+            <td class="r">1</td>
+            <td class="r">101</td>
+            <td class="r amt">₹1,480</td>
+            <td class="r">751</td>
+            <td class="r amt ytd-amt">₹11,005</td>
+            <td class="r">12</td>
+            <td class="r">63</td>
+            <td class="r amt">₹917</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(35)">
+            <td>36</td>
+            <td><strong>ANNASAHEB GOPINATH KALE</strong></td>
+            <td class="mono">170524604101, 170524604135 +1</td>
+            <td class="r">3</td>
+            <td class="r">136</td>
+            <td class="r amt">₹1,380</td>
+            <td class="r">1,929</td>
+            <td class="r amt ytd-amt">₹19,574</td>
+            <td class="r">12</td>
+            <td class="r">161</td>
+            <td class="r amt">₹1,631</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(36)">
+            <td>37</td>
+            <td><strong>ANUPAM MEHROTRA</strong></td>
+            <td class="mono">170524517135</td>
+            <td class="r">1</td>
+            <td class="r">88</td>
+            <td class="r amt">₹1,370</td>
+            <td class="r">88</td>
+            <td class="r amt ytd-amt">₹1,370</td>
+            <td class="r">1</td>
+            <td class="r">88</td>
+            <td class="r amt">₹1,370</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(37)">
+            <td>38</td>
+            <td><strong>AMIT RAVINDRA RATHOD</strong></td>
+            <td class="mono">170521463727</td>
+            <td class="r">1</td>
+            <td class="r">54</td>
+            <td class="r amt">₹1,360</td>
+            <td class="r">1,420</td>
+            <td class="r amt ytd-amt">₹35,763</td>
+            <td class="r">12</td>
+            <td class="r">118</td>
+            <td class="r amt">₹2,980</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(38)">
+            <td>39</td>
+            <td><strong>RAJESH KUMAR SHAW</strong></td>
+            <td class="mono">170524594407, 170524594415</td>
+            <td class="r">2</td>
+            <td class="r">141</td>
+            <td class="r amt">₹1,280</td>
+            <td class="r">917</td>
+            <td class="r amt ytd-amt">₹8,325</td>
+            <td class="r">12</td>
+            <td class="r">76</td>
+            <td class="r amt">₹694</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(39)">
+            <td>40</td>
+            <td><strong>VAIBHAV ARUN GORADE</strong></td>
+            <td class="mono">170521444901</td>
+            <td class="r">1</td>
+            <td class="r">67</td>
+            <td class="r amt">₹1,100</td>
+            <td class="r">1,450</td>
+            <td class="r amt ytd-amt">₹23,806</td>
+            <td class="r">12</td>
+            <td class="r">121</td>
+            <td class="r amt">₹1,984</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(40)">
+            <td>41</td>
+            <td><strong>E SUDHAKAR SHANKARRAO GADEKAR</strong></td>
+            <td class="mono">170521554919</td>
+            <td class="r">1</td>
+            <td class="r">90</td>
+            <td class="r amt">₹1,090</td>
+            <td class="r">2,653</td>
+            <td class="r amt ytd-amt">₹32,131</td>
+            <td class="r">12</td>
+            <td class="r">221</td>
+            <td class="r amt">₹2,678</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(41)">
+            <td>42</td>
+            <td><strong>PUSHPA SANDEEP BHANDARI</strong></td>
+            <td class="mono">170521543798</td>
+            <td class="r">1</td>
+            <td class="r">0</td>
+            <td class="r amt">₹1,070</td>
+            <td class="r">2,923</td>
+            <td class="r amt ytd-amt">₹12,840</td>
+            <td class="r">12</td>
+            <td class="r">244</td>
+            <td class="r amt">₹1,070</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(42)">
+            <td>43</td>
+            <td><strong>MACHINDRA KESHAV GARJE</strong></td>
+            <td class="mono">170521444889</td>
+            <td class="r">1</td>
+            <td class="r">2</td>
+            <td class="r amt">₹860</td>
+            <td class="r">385</td>
+            <td class="r amt ytd-amt">₹165,550</td>
+            <td class="r">12</td>
+            <td class="r">32</td>
+            <td class="r amt">₹13,796</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(43)">
+            <td>44</td>
+            <td><strong>SATISH KAKASAHEB CHAVAN</strong></td>
+            <td class="mono">170521452008</td>
+            <td class="r">1</td>
+            <td class="r">98</td>
+            <td class="r amt">₹820</td>
+            <td class="r">842</td>
+            <td class="r amt ytd-amt">₹7,045</td>
+            <td class="r">7</td>
+            <td class="r">120</td>
+            <td class="r amt">₹1,006</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(44)">
+            <td>45</td>
+            <td><strong>MANIK NAMDEO SHINDE</strong></td>
+            <td class="mono">170521444871</td>
+            <td class="r">1</td>
+            <td class="r">94</td>
+            <td class="r amt">₹790</td>
+            <td class="r">844</td>
+            <td class="r amt ytd-amt">₹7,093</td>
+            <td class="r">12</td>
+            <td class="r">70</td>
+            <td class="r amt">₹591</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(45)">
+            <td>46</td>
+            <td><strong>SHARAD ANANDRAO DUNDE</strong></td>
+            <td class="mono">170521447021</td>
+            <td class="r">1</td>
+            <td class="r">78</td>
+            <td class="r amt">₹700</td>
+            <td class="r">1,106</td>
+            <td class="r amt ytd-amt">₹9,926</td>
+            <td class="r">12</td>
+            <td class="r">92</td>
+            <td class="r amt">₹827</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(46)">
+            <td>47</td>
+            <td><strong>VASIM SHAUKAT TAMBOLI</strong></td>
+            <td class="mono">170521451991</td>
+            <td class="r">1</td>
+            <td class="r">74</td>
+            <td class="r amt">₹660</td>
+            <td class="r">1,245</td>
+            <td class="r amt ytd-amt">₹11,104</td>
+            <td class="r">12</td>
+            <td class="r">104</td>
+            <td class="r amt">₹925</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(47)">
+            <td>48</td>
+            <td><strong>BHOITE</strong></td>
+            <td class="mono">170521723630</td>
+            <td class="r">1</td>
+            <td class="r">74</td>
+            <td class="r amt">₹640</td>
+            <td class="r">74</td>
+            <td class="r amt ytd-amt">₹640</td>
+            <td class="r">1</td>
+            <td class="r">74</td>
+            <td class="r amt">₹640</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(48)">
+            <td>49</td>
+            <td><strong>ATUL PURUSHOTAM PITRUBHAKTA</strong></td>
+            <td class="mono">170524514110</td>
+            <td class="r">1</td>
+            <td class="r">30</td>
+            <td class="r amt">₹580</td>
+            <td class="r">264</td>
+            <td class="r amt ytd-amt">₹5,104</td>
+            <td class="r">12</td>
+            <td class="r">22</td>
+            <td class="r amt">₹425</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(49)">
+            <td>50</td>
+            <td><strong>KOTTAKALATHIT SANOOJ</strong></td>
+            <td class="mono">170521543780</td>
+            <td class="r">1</td>
+            <td class="r">0</td>
+            <td class="r amt">₹530</td>
+            <td class="r">1,842</td>
+            <td class="r amt ytd-amt">₹6,360</td>
+            <td class="r">12</td>
+            <td class="r">154</td>
+            <td class="r amt">₹530</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(50)">
+            <td>51</td>
+            <td><strong>GAT NO</strong></td>
+            <td class="mono">170521720134, 170521723656</td>
+            <td class="r">2</td>
+            <td class="r">24</td>
+            <td class="r amt">₹460</td>
+            <td class="r">24</td>
+            <td class="r amt ytd-amt">₹460</td>
+            <td class="r">1</td>
+            <td class="r">24</td>
+            <td class="r amt">₹460</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(51)">
+            <td>52</td>
+            <td><strong>SUDHIR P MANGALE AND SHARAD A DUNDE P</strong></td>
+            <td class="mono">170521447039</td>
+            <td class="r">1</td>
+            <td class="r">21</td>
+            <td class="r amt">₹290</td>
+            <td class="r">594</td>
+            <td class="r amt ytd-amt">₹8,203</td>
+            <td class="r">12</td>
+            <td class="r">50</td>
+            <td class="r amt">₹684</td>
+        </tr>
+<tr class="row-click" onclick="showCustomer(52)">
+            <td>53</td>
+            <td><strong>E PANKAJ KUMAR</strong></td>
+            <td class="mono">170521473188</td>
+            <td class="r">1</td>
+            <td class="r">17</td>
+            <td class="r amt">₹270</td>
+            <td class="r">1,232</td>
+            <td class="r amt ytd-amt">₹19,567</td>
+            <td class="r">12</td>
+            <td class="r">103</td>
+            <td class="r amt">₹1,631</td>
+        </tr>
+</tbody>
+        </table>
+    </div>
+</div>
+</div>
+
+<div id="detail-view">
+    <div class="panel" id="detail-content"></div>
+</div>
+</div>
+
+<div class="footer">
+    <p>Kalpdev Solar | solar-panel-india.com | Data from MSEDCL bills via OCR</p>
+</div>
+
+<script>
+const customers = [{"name": "SUDHAKAR SHANKARRAO GADEKAR", "address": "G.No.742•, Dreams Heights-2;FLAT NO-404; Gade WastHAVELl PUNE Wagholi (CT) 41220", "consumer_numbers": ["170521554765", "170521554773", "170521554781", "170521554790", "170521554803", "170521554820", "170521554846", "170521554871", "170521554889", "170521554901", "170521554935"], "connection_types": ["Residential 3-Ph", "Residential 1-Ph", "Residential"], "num_bills": 11, "num_meters": 11, "meter_details": [{"consumer_number": "170521554765", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 2210.0, "units": 195, "history": [97, 124, 112, 195]}, {"consumer_number": "170521554773", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1800.0, "units": 1466, "history": [14, 81, 77, 83, 86, 117, 82]}, {"consumer_number": "170521554781", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1230.0, "units": 75, "history": []}, {"consumer_number": "170521554790", "connection_type": "Residential 3-Ph", "load_kw": 2.0, "bill_amount": 630.0, "units": 70, "history": [70, 70, 50, 75, 6, 7, 8, 392, 400, 7, 5, 630]}, {"consumer_number": "170521554803", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 3810.0, "units": 301, "history": [100, 150, 20, 250, 50, 256, 14, 301]}, {"consumer_number": "170521554820", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1530.0, "units": 50, "history": []}, {"consumer_number": "170521554846", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 550.0, "units": 58, "history": [58, 150, 100, 50, 8, 396, 400, 6, 7, 7, 5, 550]}, {"consumer_number": "170521554871", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 2470.0, "units": 212, "history": [212, 212, 150, 100, 50, 200, 8, 398, 400, 62, 7, 7]}, {"consumer_number": "170521554889", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1820.0, "units": 115, "history": [100, 75, 50, 25, 87, 61, 91, 115, 70]}, {"consumer_number": "170521554901", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 820.0, "units": 98, "history": [98, 50, 75, 91, 27, 29, 74, 79, 95, 25, 26, 41]}, {"consumer_number": "170521554935", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 1730.0, "units": 163, "history": [126, 128, 141, 104, 26, 13, 7, 1136, 50, 5, 163, 100]}], "current_month_bill": 18600, "current_month_units": 2803, "monthly_combined": [{"month": "May-26", "units": 875, "meters_reporting": 9}, {"month": "Apr-26", "units": 1040, "meters_reporting": 9}, {"month": "Mar-26", "units": 775, "meters_reporting": 9}, {"month": "Feb-26", "units": 973, "meters_reporting": 9}, {"month": "Jan-26", "units": 340, "meters_reporting": 8}, {"month": "Dec-25", "units": 1079, "meters_reporting": 8}, {"month": "Nov-25", "units": 684, "meters_reporting": 8}, {"month": "Oct-25", "units": 2427, "meters_reporting": 7}, {"month": "Sep-25", "units": 1022, "meters_reporting": 6}, {"month": "Aug-25", "units": 106, "meters_reporting": 5}, {"month": "Jul-25", "units": 206, "meters_reporting": 5}, {"month": "Jun-25", "units": 1328, "meters_reporting": 5}], "ytd_units": 10855, "ytd_amount": 72031, "ytd_months": 12, "avg_monthly_units": 905, "avg_monthly_amount": 6003}, {"name": "KASHINATH APPARAO HIRMUKHE", "address": "GAT NO 741 PL.NO 15 BEHIND oxy VALLEY HAVELI PUNEWagholi (CT) 412207", "consumer_numbers": ["170521388741", "170521553483", "170521553505"], "connection_types": ["Residential 1-Ph", "Commercial", "Residential"], "num_bills": 3, "num_meters": 3, "meter_details": [{"consumer_number": "170521388741", "connection_type": "Commercial", "load_kw": 1.0, "bill_amount": 5500.0, "units": 4, "history": []}, {"consumer_number": "170521553483", "connection_type": "Residential", "load_kw": 0, "bill_amount": 3470.0, "units": 172, "history": [176, 137, 169, 164, 164, 172]}, {"consumer_number": "170521553505", "connection_type": "Residential 1-Ph", "load_kw": 0, "bill_amount": 4640.0, "units": 214, "history": [214, 50, 20, 6, 25, 5, 214, 150, 100, 62, 7, 8]}], "current_month_bill": 13610, "current_month_units": 390, "monthly_combined": [{"month": "May-26", "units": 390, "meters_reporting": 2}, {"month": "Apr-26", "units": 187, "meters_reporting": 2}, {"month": "Mar-26", "units": 189, "meters_reporting": 2}, {"month": "Feb-26", "units": 170, "meters_reporting": 2}, {"month": "Jan-26", "units": 189, "meters_reporting": 2}, {"month": "Dec-25", "units": 177, "meters_reporting": 2}, {"month": "Nov-25", "units": 214, "meters_reporting": 1}, {"month": "Oct-25", "units": 150, "meters_reporting": 1}, {"month": "Sep-25", "units": 100, "meters_reporting": 1}, {"month": "Aug-25", "units": 62, "meters_reporting": 1}, {"month": "Jul-25", "units": 7, "meters_reporting": 1}, {"month": "Jun-25", "units": 8, "meters_reporting": 1}], "ytd_units": 1843, "ytd_amount": 64316, "ytd_months": 12, "avg_monthly_units": 154, "avg_monthly_amount": 5360}, {"name": "SHILPA SANDIP SATAV", "address": "GAT NO.740/1 2;PL.NO.38 FLAT SHILP HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524551953", "170524551961", "170524551970", "170524551996", "170524552003", "170524552011", "170524552054", "170524552062", "170524552071", "170524552089", "170524552097", "170524552119"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 12, "num_meters": 12, "meter_details": [{"consumer_number": "170524551953", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 920.0, "units": 2, "history": [25, 28, 27, 38, 10, 50, 75, 100, 10, 311, 130]}, {"consumer_number": "170524551961", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 720.0, "units": 1961, "history": []}, {"consumer_number": "170524551970", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 860.0, "units": 0, "history": [50, 75, 100, 300, 8, 324, 400, 6, 7, 7, 5, 860]}, {"consumer_number": "170524551996", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 580.0, "units": 100, "history": [100, 125, 75, 25, 50, 41, 27, 30, 58, 124, 40, 8]}, {"consumer_number": "170524552003", "connection_type": "Residential 1-Ph", "load_kw": 0, "bill_amount": 480.0, "units": 0, "history": [5, 10, 15, 20, 25, 30, 30, 16]}, {"consumer_number": "170524552011", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 2450.0, "units": 150, "history": []}, {"consumer_number": "170524552054", "connection_type": "Residential", "load_kw": 3.0, "bill_amount": 540.0, "units": 50, "history": [208, 31]}, {"consumer_number": "170524552062", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 2150.0, "units": 50, "history": [154, 50, 75, 100, 6, 7, 8, 7, 5, 27, 5, 12]}, {"consumer_number": "170524552071", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 830.0, "units": 100, "history": []}, {"consumer_number": "170524552089", "connection_type": "Residential 1-Ph", "load_kw": 0, "bill_amount": 750.0, "units": 1, "history": [100, 150, 8, 334, 400, 62, 7, 7, 5, 750, 27, 5]}, {"consumer_number": "170524552097", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 780.0, "units": 0, "history": [25, 90, 50, 75, 119]}, {"consumer_number": "170524552119", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 710.0, "units": 1, "history": []}], "current_month_bill": 11770, "current_month_units": 2415, "monthly_combined": [{"month": "May-26", "units": 667, "meters_reporting": 8}, {"month": "Apr-26", "units": 559, "meters_reporting": 8}, {"month": "Mar-26", "units": 350, "meters_reporting": 7}, {"month": "Feb-26", "units": 892, "meters_reporting": 7}, {"month": "Jan-26", "units": 618, "meters_reporting": 7}, {"month": "Dec-25", "units": 514, "meters_reporting": 6}, {"month": "Nov-25", "units": 547, "meters_reporting": 6}, {"month": "Oct-25", "units": 166, "meters_reporting": 6}, {"month": "Sep-25", "units": 85, "meters_reporting": 5}, {"month": "Aug-25", "units": 1219, "meters_reporting": 5}, {"month": "Jul-25", "units": 207, "meters_reporting": 5}, {"month": "Jun-25", "units": 885, "meters_reporting": 4}], "ytd_units": 6709, "ytd_amount": 32698, "ytd_months": 12, "avg_monthly_units": 559, "avg_monthly_amount": 2725}, {"name": "PANDURANG DNYANDEV DEVKATE", "address": "GAT NO.742 F.NO 201 GADE WASTI HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524522635", "170524594105", "170524594598", "170524594601", "170524594610", "170524594636"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 6, "num_meters": 6, "meter_details": [{"consumer_number": "170524522635", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 1420.0, "units": 142, "history": [142, 15, 10, 812, 57, 5, 142, 125, 100, 75, 50, 25]}, {"consumer_number": "170524594105", "connection_type": "Residential", "load_kw": 1.0, "bill_amount": 2830.0, "units": 14, "history": [121, 50, 121, 100, 150, 62, 7, 8, 7, 5, 27, 5]}, {"consumer_number": "170524594598", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1010.0, "units": 115, "history": [5, 11, 1136, 50, 5, 115, 100, 132, 124, 137, 106, 131]}, {"consumer_number": "170524594601", "connection_type": "Residential", "load_kw": 1.0, "bill_amount": 500.0, "units": 51, "history": []}, {"consumer_number": "170524594610", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 4900.0, "units": 171, "history": [171, 47, 28, 47, 76, 21, 5, 11, 642, 5, 150, 100]}, {"consumer_number": "170524594636", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 740.0, "units": 87, "history": [25, 50, 75, 6, 7, 7, 5, 740, 27, 5, 750, 12]}], "current_month_bill": 11400, "current_month_units": 580, "monthly_combined": [{"month": "May-26", "units": 464, "meters_reporting": 5}, {"month": "Apr-26", "units": 173, "meters_reporting": 5}, {"month": "Mar-26", "units": 1370, "meters_reporting": 5}, {"month": "Feb-26", "units": 1015, "meters_reporting": 5}, {"month": "Jan-26", "units": 295, "meters_reporting": 5}, {"month": "Dec-25", "units": 210, "meters_reporting": 5}, {"month": "Nov-25", "units": 259, "meters_reporting": 5}, {"month": "Oct-25", "units": 1016, "meters_reporting": 5}, {"month": "Sep-25", "units": 900, "meters_reporting": 5}, {"month": "Aug-25", "units": 227, "meters_reporting": 5}, {"month": "Jul-25", "units": 1083, "meters_reporting": 5}, {"month": "Jun-25", "units": 273, "meters_reporting": 5}], "ytd_units": 7285, "ytd_amount": 143188, "ytd_months": 12, "avg_monthly_units": 607, "avg_monthly_amount": 11932}, {"name": "SUNIL SHIVAJIRAO BHOITE", "address": "FLAT NO 201 GAT NO 742 oxy SOCIETY GADE VASTI WAHAVELI PUNE Waghoti (CT) 412207", "consumer_numbers": ["170521591440", "170521720151", "170521720193", "170521720231", "170521723648", "170521723664"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 6, "num_meters": 6, "meter_details": [{"consumer_number": "170521591440", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 1230.0, "units": 43, "history": [43, 300, 200, 100, 23, 43, 17, 396, 319, 159, 107, 400]}, {"consumer_number": "170521723648", "connection_type": "Residential", "load_kw": 1.0, "bill_amount": 960.0, "units": 55, "history": []}, {"consumer_number": "170521723664", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 2050.0, "units": 71, "history": []}, {"consumer_number": "170521720151", "connection_type": "Residential 1-Ph", "load_kw": 0, "bill_amount": 510.0, "units": 54, "history": []}, {"consumer_number": "170521720193", "connection_type": "Residential", "load_kw": 1.0, "bill_amount": 560.0, "units": 62, "history": []}, {"consumer_number": "170521720231", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 3370.0, "units": 282, "history": []}], "current_month_bill": 8680, "current_month_units": 567, "monthly_combined": [{"month": "May-26", "units": 43, "meters_reporting": 1}, {"month": "Apr-26", "units": 300, "meters_reporting": 1}, {"month": "Mar-26", "units": 200, "meters_reporting": 1}, {"month": "Feb-26", "units": 100, "meters_reporting": 1}, {"month": "Jan-26", "units": 23, "meters_reporting": 1}, {"month": "Dec-25", "units": 43, "meters_reporting": 1}, {"month": "Nov-25", "units": 17, "meters_reporting": 1}, {"month": "Oct-25", "units": 396, "meters_reporting": 1}, {"month": "Sep-25", "units": 319, "meters_reporting": 1}, {"month": "Aug-25", "units": 159, "meters_reporting": 1}, {"month": "Jul-25", "units": 107, "meters_reporting": 1}, {"month": "Jun-25", "units": 400, "meters_reporting": 1}], "ytd_units": 2107, "ytd_amount": 32255, "ytd_months": 12, "avg_monthly_units": 176, "avg_monthly_amount": 2688}, {"name": "PRAKASH ASARAJI DAHIFALE", "address": "gat no 742 plot no 49 gade wasti HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524535168", "170524577448", "170524577456", "170524577464"], "connection_types": ["Residential 1-Ph"], "num_bills": 4, "num_meters": 4, "meter_details": [{"consumer_number": "170524535168", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 2570.0, "units": 88, "history": [90, 113, 115, 100, 83, 101]}, {"consumer_number": "170524577448", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1700.0, "units": 159, "history": []}, {"consumer_number": "170524577456", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 2360.0, "units": 8, "history": [97, 5, 97, 100, 75, 50, 25, 79, 8, 280, 400, 62]}, {"consumer_number": "170524577464", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 650.0, "units": 2026, "history": []}], "current_month_bill": 7280, "current_month_units": 2281, "monthly_combined": [{"month": "May-26", "units": 187, "meters_reporting": 2}, {"month": "Apr-26", "units": 118, "meters_reporting": 2}, {"month": "Mar-26", "units": 212, "meters_reporting": 2}, {"month": "Feb-26", "units": 200, "meters_reporting": 2}, {"month": "Jan-26", "units": 158, "meters_reporting": 2}, {"month": "Dec-25", "units": 151, "meters_reporting": 2}, {"month": "Nov-25", "units": 25, "meters_reporting": 1}, {"month": "Oct-25", "units": 79, "meters_reporting": 1}, {"month": "Sep-25", "units": 8, "meters_reporting": 1}, {"month": "Aug-25", "units": 280, "meters_reporting": 1}, {"month": "Jul-25", "units": 400, "meters_reporting": 1}, {"month": "Jun-25", "units": 62, "meters_reporting": 1}], "ytd_units": 1880, "ytd_amount": 6000, "ytd_months": 12, "avg_monthly_units": 157, "avg_monthly_amount": 500}, {"name": "SUDHAKAR SHANKARRAO", "address": "G.no.742; Dreams Heights-2; COMMON Gade Wasti HAVEL' PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521554811", "170521554862", "170521555486"], "connection_types": ["Residential 3-Ph", "Residential 1-Ph", "Residential"], "num_bills": 3, "num_meters": 3, "meter_details": [{"consumer_number": "170521554811", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 440.0, "units": 1765, "history": [143, 117, 57, 11, 35, 42, 65]}, {"consumer_number": "170521554862", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 3290.0, "units": 100, "history": [100, 150, 62, 7, 8, 397, 400, 7, 5, 27, 5, 12]}, {"consumer_number": "170521555486", "connection_type": "Residential 3-Ph", "load_kw": 5.0, "bill_amount": 3320.0, "units": 245, "history": [292, 227, 7, 5, 75, 5, 245, 100, 200, 300, 6, 27]}], "current_month_bill": 7050, "current_month_units": 2110, "monthly_combined": [{"month": "May-26", "units": 535, "meters_reporting": 3}, {"month": "Apr-26", "units": 494, "meters_reporting": 3}, {"month": "Mar-26", "units": 126, "meters_reporting": 3}, {"month": "Feb-26", "units": 23, "meters_reporting": 3}, {"month": "Jan-26", "units": 118, "meters_reporting": 3}, {"month": "Dec-25", "units": 444, "meters_reporting": 3}, {"month": "Nov-25", "units": 710, "meters_reporting": 3}, {"month": "Oct-25", "units": 107, "meters_reporting": 2}, {"month": "Sep-25", "units": 205, "meters_reporting": 2}, {"month": "Aug-25", "units": 327, "meters_reporting": 2}, {"month": "Jul-25", "units": 11, "meters_reporting": 2}, {"month": "Jun-25", "units": 39, "meters_reporting": 2}], "ytd_units": 3139, "ytd_amount": 10488, "ytd_months": 12, "avg_monthly_units": 262, "avg_monthly_amount": 874}, {"name": "PANKAJ KUMAR", "address": "G.NO. 742 BAKORI RD. oxy VILL GADE WASTI HAVE-LI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521473161", "170521473170", "170521473196", "170521473200", "170524521108"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 5, "num_meters": 5, "meter_details": [{"consumer_number": "170521473161", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 2580.0, "units": 220, "history": [220, 220, 100, 150, 6, 7, 8, 338, 400, 7, 5, 27]}, {"consumer_number": "170521473170", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 630.0, "units": 0, "history": [50, 25, 77, 109, 97, 75, 100, 10, 62, 7, 8, 339]}, {"consumer_number": "170521473196", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 2020.0, "units": 182, "history": []}, {"consumer_number": "170521473200", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 840.0, "units": 102, "history": [97, 102, 88, 61, 75, 72, 77]}, {"consumer_number": "170524521108", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 910.0, "units": 109, "history": [150, 100, 50, 8, 343, 400, 62, 7, 7, 5, 910, 27]}], "current_month_bill": 6980, "current_month_units": 613, "monthly_combined": [{"month": "May-26", "units": 517, "meters_reporting": 4}, {"month": "Apr-26", "units": 447, "meters_reporting": 4}, {"month": "Mar-26", "units": 315, "meters_reporting": 4}, {"month": "Feb-26", "units": 328, "meters_reporting": 4}, {"month": "Jan-26", "units": 521, "meters_reporting": 4}, {"month": "Dec-25", "units": 554, "meters_reporting": 4}, {"month": "Nov-25", "units": 247, "meters_reporting": 4}, {"month": "Oct-25", "units": 355, "meters_reporting": 3}, {"month": "Sep-25", "units": 469, "meters_reporting": 3}, {"month": "Aug-25", "units": 19, "meters_reporting": 3}, {"month": "Jul-25", "units": 923, "meters_reporting": 3}, {"month": "Jun-25", "units": 393, "meters_reporting": 3}], "ytd_units": 5088, "ytd_amount": 57935, "ytd_months": 12, "avg_monthly_units": 424, "avg_monthly_amount": 4828}, {"name": "MANGESH DATTATRAY JOSHI", "address": "G.NO. 742 NR.OXY VALLY SOC. GADE WASTI HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521451974", "170521451982", "170521452016", "170521452083", "170521452105", "170521452113", "170524508519"], "connection_types": ["Residential 1-Ph"], "num_bills": 7, "num_meters": 7, "meter_details": [{"consumer_number": "170521451974", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 630.0, "units": 70, "history": []}, {"consumer_number": "170521451982", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 840.0, "units": 102, "history": [200, 150, 50, 100, 8, 310, 400, 62, 7, 7, 5, 840]}, {"consumer_number": "170521452016", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1280.0, "units": 133, "history": [133, 8, 1136, 50, 5, 133, 50, 75, 100, 125, 25, 124]}, {"consumer_number": "170521452083", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 800.0, "units": 95, "history": [95, 50, 47, 21, 136, 100, 150, 8, 314, 400, 6, 7]}, {"consumer_number": "170521452105", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1060.0, "units": 27, "history": [27, 27, 75, 50, 25, 81, 78, 8, 315, 400, 62, 7]}, {"consumer_number": "170521452113", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 370.0, "units": 89, "history": [72, 71, 37, 70, 89]}, {"consumer_number": "170524508519", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 1670.0, "units": 159, "history": [150, 100, 50, 200, 8, 317, 400, 62, 7, 7, 5, 27]}], "current_month_bill": 6650, "current_month_units": 675, "monthly_combined": [{"month": "May-26", "units": 677, "meters_reporting": 6}, {"month": "Apr-26", "units": 406, "meters_reporting": 6}, {"month": "Mar-26", "units": 1395, "meters_reporting": 6}, {"month": "Feb-26", "units": 491, "meters_reporting": 6}, {"month": "Jan-26", "units": 271, "meters_reporting": 6}, {"month": "Dec-25", "units": 941, "meters_reporting": 5}, {"month": "Nov-25", "units": 1078, "meters_reporting": 5}, {"month": "Oct-25", "units": 215, "meters_reporting": 5}, {"month": "Sep-25", "units": 743, "meters_reporting": 5}, {"month": "Aug-25", "units": 939, "meters_reporting": 5}, {"month": "Jul-25", "units": 103, "meters_reporting": 5}, {"month": "Jun-25", "units": 1005, "meters_reporting": 5}], "ytd_units": 8264, "ytd_amount": 81416, "ytd_months": 12, "avg_monthly_units": 689, "avg_monthly_amount": 6785}, {"name": "AMOL VIJAYKUMAR JALAN", "address": "Gat No. 741 oxy Vhilla; Gade vasti HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521407941", "170521437769"], "connection_types": ["Residential 1-Ph"], "num_bills": 2, "num_meters": 2, "meter_details": [{"consumer_number": "170521407941", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 3400.0, "units": 274, "history": [163, 182, 157, 70, 200, 150, 100, 50, 149, 274]}, {"consumer_number": "170521437769", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 3170.0, "units": 258, "history": [100, 150, 200, 250, 50, 152, 61, 91, 61, 6, 258]}], "current_month_bill": 6570, "current_month_units": 532, "monthly_combined": [{"month": "May-26", "units": 263, "meters_reporting": 2}, {"month": "Apr-26", "units": 332, "meters_reporting": 2}, {"month": "Mar-26", "units": 357, "meters_reporting": 2}, {"month": "Feb-26", "units": 320, "meters_reporting": 2}, {"month": "Jan-26", "units": 250, "meters_reporting": 2}, {"month": "Dec-25", "units": 302, "meters_reporting": 2}, {"month": "Nov-25", "units": 161, "meters_reporting": 2}, {"month": "Oct-25", "units": 141, "meters_reporting": 2}, {"month": "Sep-25", "units": 210, "meters_reporting": 2}, {"month": "Aug-25", "units": 280, "meters_reporting": 2}, {"month": "Jul-25", "units": 258, "meters_reporting": 1}], "ytd_units": 2874, "ytd_amount": 35493, "ytd_months": 11, "avg_monthly_units": 261, "avg_monthly_amount": 3227}, {"name": "PANKAJ RAJENDRA KAKAD", "address": "G;NO 742 F.NO 202 MAITRI SADAN OXY VILLAS;GADE WAHAVELI PUNE Wagholi (CT) fr-e :", "consumer_numbers": ["170524606782"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170524606782", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 5680.0, "units": 245, "history": [200, 150, 100, 50, 6, 7, 8, 378, 400, 7, 5, 27]}], "current_month_bill": 5680, "current_month_units": 245, "monthly_combined": [{"month": "May-26", "units": 200, "meters_reporting": 1}, {"month": "Apr-26", "units": 150, "meters_reporting": 1}, {"month": "Mar-26", "units": 100, "meters_reporting": 1}, {"month": "Feb-26", "units": 50, "meters_reporting": 1}, {"month": "Jan-26", "units": 6, "meters_reporting": 1}, {"month": "Dec-25", "units": 7, "meters_reporting": 1}, {"month": "Nov-25", "units": 8, "meters_reporting": 1}, {"month": "Oct-25", "units": 378, "meters_reporting": 1}, {"month": "Sep-25", "units": 400, "meters_reporting": 1}, {"month": "Aug-25", "units": 7, "meters_reporting": 1}, {"month": "Jul-25", "units": 5, "meters_reporting": 1}, {"month": "Jun-25", "units": 27, "meters_reporting": 1}], "ytd_units": 1338, "ytd_amount": 31020, "ytd_months": 12, "avg_monthly_units": 112, "avg_monthly_amount": 2585}, {"name": "SONALI MININATH LAWANDE", "address": "Gat no 742; Flat no 201 oxy villa HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521456844", "170521456852"], "connection_types": ["Residential"], "num_bills": 2, "num_meters": 2, "meter_details": [{"consumer_number": "170521456844", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 640.0, "units": 72, "history": [71, 81, 57, 71, 81, 10, 1110, 5, 72, 72, 75, 50]}, {"consumer_number": "170521456852", "connection_type": "Residential", "load_kw": 0, "bill_amount": 4380.0, "units": 334, "history": [334, 100, 10, 1213, 50, 5, 334, 200, 286, 234, 234, 238]}], "current_month_bill": 5020, "current_month_units": 406, "monthly_combined": [{"month": "May-26", "units": 405, "meters_reporting": 2}, {"month": "Apr-26", "units": 181, "meters_reporting": 2}, {"month": "Mar-26", "units": 67, "meters_reporting": 2}, {"month": "Feb-26", "units": 1284, "meters_reporting": 2}, {"month": "Jan-26", "units": 131, "meters_reporting": 2}, {"month": "Dec-25", "units": 15, "meters_reporting": 2}, {"month": "Nov-25", "units": 1444, "meters_reporting": 2}, {"month": "Oct-25", "units": 205, "meters_reporting": 2}, {"month": "Sep-25", "units": 358, "meters_reporting": 2}, {"month": "Aug-25", "units": 306, "meters_reporting": 2}, {"month": "Jul-25", "units": 309, "meters_reporting": 2}, {"month": "Jun-25", "units": 288, "meters_reporting": 2}], "ytd_units": 4993, "ytd_amount": 61736, "ytd_months": 12, "avg_monthly_units": 416, "avg_monthly_amount": 5145}, {"name": "KASHINATH SAHEBRAO DHAKANE", "address": "gat no 742 plot no 48 gade wasti HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524535133", "170524577405", "170524577413", "170524577421"], "connection_types": ["Residential 1-Ph"], "num_bills": 4, "num_meters": 4, "meter_details": [{"consumer_number": "170524535133", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1070.0, "units": 60, "history": [60, 1254, 97, 5, 60, 50, 72, 54, 12, 6, 75, 10]}, {"consumer_number": "170524577405", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 2190.0, "units": 98, "history": []}, {"consumer_number": "170524577413", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 840.0, "units": 101, "history": []}, {"consumer_number": "170524577421", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 720.0, "units": 84, "history": [75, 50, 25, 100, 212, 233, 345, 10, 91, 87, 94, 97]}], "current_month_bill": 4820, "current_month_units": 343, "monthly_combined": [{"month": "May-26", "units": 135, "meters_reporting": 2}, {"month": "Apr-26", "units": 1304, "meters_reporting": 2}, {"month": "Mar-26", "units": 122, "meters_reporting": 2}, {"month": "Feb-26", "units": 105, "meters_reporting": 2}, {"month": "Jan-26", "units": 272, "meters_reporting": 2}, {"month": "Dec-25", "units": 283, "meters_reporting": 2}, {"month": "Nov-25", "units": 417, "meters_reporting": 2}, {"month": "Oct-25", "units": 64, "meters_reporting": 2}, {"month": "Sep-25", "units": 103, "meters_reporting": 2}, {"month": "Aug-25", "units": 93, "meters_reporting": 2}, {"month": "Jul-25", "units": 169, "meters_reporting": 2}, {"month": "Jun-25", "units": 107, "meters_reporting": 2}], "ytd_units": 3174, "ytd_amount": 44603, "ytd_months": 12, "avg_monthly_units": 264, "avg_monthly_amount": 3717}, {"name": "NAMDEO ANANDRAO GAWALI", "address": "GAT NO.740/1 FLAT NO.404;OXY SHILP HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524551902", "170524551911", "170524551937", "170524551945", "170524552020", "170524552046", "170524552101"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 7, "num_meters": 7, "meter_details": [{"consumer_number": "170524551902", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 500.0, "units": 25, "history": [25, 13, 61, 48, 31, 125, 29, 50, 100, 75, 125, 10]}, {"consumer_number": "170524551911", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 850.0, "units": 8, "history": [50, 25, 24, 33, 26, 21, 125, 39, 100, 75, 125, 10]}, {"consumer_number": "170524551937", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 420.0, "units": 100, "history": [50, 18, 9, 5, 100, 150, 8, 62, 7, 7, 5, 420]}, {"consumer_number": "170524551945", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 690.0, "units": 75, "history": [50, 25, 23, 31, 33, 16, 132, 27, 125, 10, 311, 5]}, {"consumer_number": "170524552020", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 820.0, "units": 2026, "history": [25, 50, 75, 24, 7, 51, 39, 19, 146]}, {"consumer_number": "170524552046", "connection_type": "Residential", "load_kw": 0, "bill_amount": 550.0, "units": 0, "history": [100, 75, 50, 25, 14, 11, 31, 15, 42, 192]}, {"consumer_number": "170524552101", "connection_type": "Residential 1-Ph", "load_kw": 3.0, "bill_amount": 940.0, "units": 100, "history": [50, 28, 42, 48, 39, 51, 90, 207]}], "current_month_bill": 4770, "current_month_units": 2334, "monthly_combined": [{"month": "May-26", "units": 350, "meters_reporting": 7}, {"month": "Apr-26", "units": 234, "meters_reporting": 7}, {"month": "Mar-26", "units": 284, "meters_reporting": 7}, {"month": "Feb-26", "units": 214, "meters_reporting": 7}, {"month": "Jan-26", "units": 250, "meters_reporting": 7}, {"month": "Dec-25", "units": 425, "meters_reporting": 7}, {"month": "Nov-25", "units": 454, "meters_reporting": 7}, {"month": "Oct-25", "units": 419, "meters_reporting": 7}, {"month": "Sep-25", "units": 520, "meters_reporting": 6}, {"month": "Aug-25", "units": 359, "meters_reporting": 5}, {"month": "Jul-25", "units": 566, "meters_reporting": 4}, {"month": "Jun-25", "units": 445, "meters_reporting": 4}], "ytd_units": 4520, "ytd_amount": 9238, "ytd_months": 12, "avg_monthly_units": 377, "avg_monthly_amount": 770}, {"name": "BHAGWAN SUDAM KARALE", "address": "G.No. eter ill Pe CJN.•U40109MH2005SGC153645 BILL OF SUPPLY FOR THE MONTH OF - @", "consumer_numbers": ["170524535141", "170524594377", "170524594385", "170524594393"], "connection_types": ["Residential 1-Ph"], "num_bills": 4, "num_meters": 4, "meter_details": [{"consumer_number": "170524535141", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 560.0, "units": 56, "history": [30, 20, 10, 57, 41, 49, 41, 52, 49, 36, 14, 46]}, {"consumer_number": "170524594377", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1280.0, "units": 80, "history": [71, 100, 71, 21, 23, 6, 7, 8, 383, 400, 7, 5]}, {"consumer_number": "170524594385", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 910.0, "units": 109, "history": []}, {"consumer_number": "170524594393", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1580.0, "units": 57, "history": [57, 5, 11, 1136, 50, 5, 57, 100, 125, 75, 50, 25]}], "current_month_bill": 4330, "current_month_units": 302, "monthly_combined": [{"month": "May-26", "units": 158, "meters_reporting": 3}, {"month": "Apr-26", "units": 125, "meters_reporting": 3}, {"month": "Mar-26", "units": 92, "meters_reporting": 3}, {"month": "Feb-26", "units": 1214, "meters_reporting": 3}, {"month": "Jan-26", "units": 114, "meters_reporting": 3}, {"month": "Dec-25", "units": 60, "meters_reporting": 3}, {"month": "Nov-25", "units": 105, "meters_reporting": 3}, {"month": "Oct-25", "units": 160, "meters_reporting": 3}, {"month": "Sep-25", "units": 557, "meters_reporting": 3}, {"month": "Aug-25", "units": 511, "meters_reporting": 3}, {"month": "Jul-25", "units": 71, "meters_reporting": 3}, {"month": "Jun-25", "units": 76, "meters_reporting": 3}], "ytd_units": 3243, "ytd_amount": 46497, "ytd_months": 12, "avg_monthly_units": 270, "avg_monthly_amount": 3875}, {"name": "SWARN RESIDENCY COMMON", "address": "Wagholi, Pune 412207", "consumer_numbers": ["170521447047"], "connection_types": ["Residential 3-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521447047", "connection_type": "Residential 3-Ph", "load_kw": 4.0, "bill_amount": 3780.0, "units": 275, "history": [275, 500, 300, 400, 100, 200, 264, 436, 8, 307, 400, 62]}], "current_month_bill": 3780, "current_month_units": 275, "monthly_combined": [{"month": "May-26", "units": 275, "meters_reporting": 1}, {"month": "Apr-26", "units": 500, "meters_reporting": 1}, {"month": "Mar-26", "units": 300, "meters_reporting": 1}, {"month": "Feb-26", "units": 400, "meters_reporting": 1}, {"month": "Jan-26", "units": 100, "meters_reporting": 1}, {"month": "Dec-25", "units": 200, "meters_reporting": 1}, {"month": "Nov-25", "units": 264, "meters_reporting": 1}, {"month": "Oct-25", "units": 436, "meters_reporting": 1}, {"month": "Sep-25", "units": 8, "meters_reporting": 1}, {"month": "Aug-25", "units": 307, "meters_reporting": 1}, {"month": "Jul-25", "units": 400, "meters_reporting": 1}, {"month": "Jun-25", "units": 62, "meters_reporting": 1}], "ytd_units": 3252, "ytd_amount": 44700, "ytd_months": 12, "avg_monthly_units": 271, "avg_monthly_amount": 3725}, {"name": "AL PARDESHI", "address": "GAT NO.742;PLOT NO.32 oxy VILLA PLOTING NEAR KALUHAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521462283"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521462283", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 3530.0, "units": 282, "history": [282, 6, 29, 31, 282, 100, 200, 300, 400, 500, 244, 332]}], "current_month_bill": 3530, "current_month_units": 282, "monthly_combined": [{"month": "May-26", "units": 282, "meters_reporting": 1}, {"month": "Apr-26", "units": 6, "meters_reporting": 1}, {"month": "Mar-26", "units": 29, "meters_reporting": 1}, {"month": "Feb-26", "units": 31, "meters_reporting": 1}, {"month": "Jan-26", "units": 282, "meters_reporting": 1}, {"month": "Dec-25", "units": 100, "meters_reporting": 1}, {"month": "Nov-25", "units": 200, "meters_reporting": 1}, {"month": "Oct-25", "units": 300, "meters_reporting": 1}, {"month": "Sep-25", "units": 400, "meters_reporting": 1}, {"month": "Aug-25", "units": 500, "meters_reporting": 1}, {"month": "Jul-25", "units": 244, "meters_reporting": 1}, {"month": "Jun-25", "units": 332, "meters_reporting": 1}], "ytd_units": 2706, "ytd_amount": 33873, "ytd_months": 12, "avg_monthly_units": 226, "avg_monthly_amount": 2823}, {"name": "NARENDRA KHUSHAL BORDE", "address": "G;NO 742 F.NO 103 MAITRI SADAN OXY VILLAS;GADE WAHAVELI PUNE Wagholi (CT) - @-20", "consumer_numbers": ["170524606804"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170524606804", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 3390.0, "units": 273, "history": []}], "current_month_bill": 3390, "current_month_units": 273, "monthly_combined": [{"month": "May-26", "units": 273, "meters_reporting": 1}], "ytd_units": 273, "ytd_amount": 3390, "ytd_months": 1, "avg_monthly_units": 273, "avg_monthly_amount": 3390}, {"name": "SUDHIR PRABHAKAR MANGALE", "address": "FL.NO. 203 SWARN RESIDENCY oxy VILL PLOTTING HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521447012"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521447012", "connection_type": "Residential 1-Ph", "load_kw": 1.5, "bill_amount": 3200.0, "units": 121, "history": [121, 50, 100, 150, 184, 124, 170, 196, 121]}], "current_month_bill": 3200, "current_month_units": 121, "monthly_combined": [{"month": "May-26", "units": 121, "meters_reporting": 1}, {"month": "Apr-26", "units": 50, "meters_reporting": 1}, {"month": "Mar-26", "units": 100, "meters_reporting": 1}, {"month": "Feb-26", "units": 150, "meters_reporting": 1}, {"month": "Jan-26", "units": 184, "meters_reporting": 1}, {"month": "Dec-25", "units": 124, "meters_reporting": 1}, {"month": "Nov-25", "units": 170, "meters_reporting": 1}, {"month": "Oct-25", "units": 196, "meters_reporting": 1}, {"month": "Sep-25", "units": 121, "meters_reporting": 1}], "ytd_units": 1216, "ytd_amount": 32159, "ytd_months": 9, "avg_monthly_units": 135, "avg_monthly_amount": 3573}, {"name": "RAVINANDAN KAMALAKAR KULKARNI", "address": "GAT NO 742;PLOT NO 42; oxy VILLA; NEAR BJS COLLEGE;BAKORI ROAD Wagholi (CT) Ta:H", "consumer_numbers": ["170521413070"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521413070", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 3090.0, "units": 251, "history": []}], "current_month_bill": 3090, "current_month_units": 251, "monthly_combined": [{"month": "May-26", "units": 251, "meters_reporting": 1}], "ytd_units": 251, "ytd_amount": 3090, "ytd_months": 1, "avg_monthly_units": 251, "avg_monthly_amount": 3090}, {"name": "SANDESH ARJUN NANDE", "address": "GAT NO 742 PLOT NO 38 oxy VELLY GADE WASTI HAVELIPUNE Wagholi (CT) 412207", "consumer_numbers": ["170521701458"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521701458", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 3010.0, "units": 502, "history": []}], "current_month_bill": 3010, "current_month_units": 502, "monthly_combined": [{"month": "May-26", "units": 502, "meters_reporting": 1}], "ytd_units": 502, "ytd_amount": 3010, "ytd_months": 1, "avg_monthly_units": 502, "avg_monthly_amount": 3010}, {"name": "ASHWINI PANDURANG NANEKAR", "address": "FLAT NO-402 SHREE RESIDENCY HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521444862"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521444862", "connection_type": "Residential 1-Ph", "load_kw": 3.93, "bill_amount": 2970.0, "units": 243, "history": [148, 198, 186, 179, 165, 224, 243]}], "current_month_bill": 2970, "current_month_units": 243, "monthly_combined": [{"month": "May-26", "units": 148, "meters_reporting": 1}, {"month": "Apr-26", "units": 198, "meters_reporting": 1}, {"month": "Mar-26", "units": 186, "meters_reporting": 1}, {"month": "Feb-26", "units": 179, "meters_reporting": 1}, {"month": "Jan-26", "units": 165, "meters_reporting": 1}, {"month": "Dec-25", "units": 224, "meters_reporting": 1}, {"month": "Nov-25", "units": 243, "meters_reporting": 1}], "ytd_units": 1343, "ytd_amount": 16414, "ytd_months": 7, "avg_monthly_units": 192, "avg_monthly_amount": 2345}, {"name": "RAJESH RAMAN HETKALE", "address": "G.NO. 742 GADE WASTI NR.OXY VILLA HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524519651", "170524606812"], "connection_types": ["Residential 1-Ph"], "num_bills": 2, "num_meters": 2, "meter_details": [{"consumer_number": "170524519651", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 1610.0, "units": 155, "history": []}, {"consumer_number": "170524606812", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 1260.0, "units": 47, "history": [75, 50, 25, 75, 47, 6, 7, 8, 381, 400, 7, 5]}], "current_month_bill": 2870, "current_month_units": 202, "monthly_combined": [{"month": "May-26", "units": 75, "meters_reporting": 1}, {"month": "Apr-26", "units": 50, "meters_reporting": 1}, {"month": "Mar-26", "units": 25, "meters_reporting": 1}, {"month": "Feb-26", "units": 75, "meters_reporting": 1}, {"month": "Jan-26", "units": 47, "meters_reporting": 1}, {"month": "Dec-25", "units": 6, "meters_reporting": 1}, {"month": "Nov-25", "units": 7, "meters_reporting": 1}, {"month": "Oct-25", "units": 8, "meters_reporting": 1}, {"month": "Sep-25", "units": 381, "meters_reporting": 1}, {"month": "Aug-25", "units": 400, "meters_reporting": 1}, {"month": "Jul-25", "units": 7, "meters_reporting": 1}, {"month": "Jun-25", "units": 5, "meters_reporting": 1}], "ytd_units": 1086, "ytd_amount": 15430, "ytd_months": 12, "avg_monthly_units": 90, "avg_monthly_amount": 1286}, {"name": "SHREE RESIDENCY SHREE RESIDENCY SHREE RESIDENCY", "address": "Wagholi, Pune 412207", "consumer_numbers": ["170524580538"], "connection_types": ["Residential 3-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170524580538", "connection_type": "Residential 3-Ph", "load_kw": 5.0, "bill_amount": 2810.0, "units": 209, "history": []}], "current_month_bill": 2810, "current_month_units": 209, "monthly_combined": [{"month": "May-26", "units": 209, "meters_reporting": 1}], "ytd_units": 209, "ytd_amount": 2810, "ytd_months": 1, "avg_monthly_units": 209, "avg_monthly_amount": 2810}, {"name": "PRAMILA KASHINATH DHAKANE", "address": "gat no 742 plot no 48 gade wasti HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524577383", "170524577391", "170524577430"], "connection_types": ["Residential 1-Ph"], "num_bills": 3, "num_meters": 3, "meter_details": [{"consumer_number": "170524577383", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 720.0, "units": 83, "history": [100, 75, 50, 25, 125, 43, 83, 60]}, {"consumer_number": "170524577391", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1460.0, "units": 143, "history": [143, 50, 143, 100, 150, 10, 73, 143, 105]}, {"consumer_number": "170524577430", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 600.0, "units": 67, "history": [10, 817, 75, 25, 50, 95, 100, 73, 67]}], "current_month_bill": 2780, "current_month_units": 293, "monthly_combined": [{"month": "May-26", "units": 253, "meters_reporting": 3}, {"month": "Apr-26", "units": 942, "meters_reporting": 3}, {"month": "Mar-26", "units": 268, "meters_reporting": 3}, {"month": "Feb-26", "units": 150, "meters_reporting": 3}, {"month": "Jan-26", "units": 325, "meters_reporting": 3}, {"month": "Dec-25", "units": 148, "meters_reporting": 3}, {"month": "Nov-25", "units": 256, "meters_reporting": 3}, {"month": "Oct-25", "units": 276, "meters_reporting": 3}, {"month": "Sep-25", "units": 172, "meters_reporting": 2}], "ytd_units": 2790, "ytd_amount": 26472, "ytd_months": 9, "avg_monthly_units": 310, "avg_monthly_amount": 2941}, {"name": "USHA ANNASAHEB KALE", "address": "GAT NO 742.F.NO 202 SAI TIRTHA APPARTMENT GADE WAHAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524535150", "170524607517"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 2, "num_meters": 2, "meter_details": [{"consumer_number": "170524535150", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 1740.0, "units": 0, "history": []}, {"consumer_number": "170524607517", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 1020.0, "units": 116, "history": [116, 116, 75, 50, 25, 10, 28, 27, 43, 40, 45, 116]}], "current_month_bill": 2760, "current_month_units": 116, "monthly_combined": [{"month": "May-26", "units": 116, "meters_reporting": 1}, {"month": "Apr-26", "units": 116, "meters_reporting": 1}, {"month": "Mar-26", "units": 75, "meters_reporting": 1}, {"month": "Feb-26", "units": 50, "meters_reporting": 1}, {"month": "Jan-26", "units": 25, "meters_reporting": 1}, {"month": "Dec-25", "units": 10, "meters_reporting": 1}, {"month": "Nov-25", "units": 28, "meters_reporting": 1}, {"month": "Oct-25", "units": 27, "meters_reporting": 1}, {"month": "Sep-25", "units": 43, "meters_reporting": 1}, {"month": "Aug-25", "units": 40, "meters_reporting": 1}, {"month": "Jul-25", "units": 45, "meters_reporting": 1}, {"month": "Jun-25", "units": 116, "meters_reporting": 1}], "ytd_units": 691, "ytd_amount": 16441, "ytd_months": 12, "avg_monthly_units": 58, "avg_monthly_amount": 1370}, {"name": "KHARWADE SHANTANU UDDHUAVRAO", "address": "GAT NO 742 PLOT NO 43 NR oxy VILLA SOCIETY HAVELIPUNE Wagholi (CT) 412207", "consumer_numbers": ["170521652139"], "connection_types": ["Commercial"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521652139", "connection_type": "Commercial", "load_kw": 2.0, "bill_amount": 2750.0, "units": 2026, "history": [9, 9]}], "current_month_bill": 2750, "current_month_units": 2026, "monthly_combined": [{"month": "May-26", "units": 9, "meters_reporting": 1}, {"month": "Apr-26", "units": 9, "meters_reporting": 1}], "ytd_units": 18, "ytd_amount": 24, "ytd_months": 2, "avg_monthly_units": 9, "avg_monthly_amount": 12}, {"name": "MININATH BHAURAO LAWANDE", "address": "Flat no-102; Gat no-742 oxy Villa HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521421943", "170521456861"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 2, "num_meters": 2, "meter_details": [{"consumer_number": "170521421943", "connection_type": "Residential", "load_kw": 2.0, "bill_amount": 1890.0, "units": 18, "history": []}, {"consumer_number": "170521456861", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 830.0, "units": 99, "history": [99, 75, 50, 25, 95, 84, 300, 8, 347, 400, 6, 7]}], "current_month_bill": 2720, "current_month_units": 117, "monthly_combined": [{"month": "May-26", "units": 99, "meters_reporting": 1}, {"month": "Apr-26", "units": 75, "meters_reporting": 1}, {"month": "Mar-26", "units": 50, "meters_reporting": 1}, {"month": "Feb-26", "units": 25, "meters_reporting": 1}, {"month": "Jan-26", "units": 95, "meters_reporting": 1}, {"month": "Dec-25", "units": 84, "meters_reporting": 1}, {"month": "Nov-25", "units": 300, "meters_reporting": 1}, {"month": "Oct-25", "units": 8, "meters_reporting": 1}, {"month": "Sep-25", "units": 347, "meters_reporting": 1}, {"month": "Aug-25", "units": 400, "meters_reporting": 1}, {"month": "Jul-25", "units": 6, "meters_reporting": 1}, {"month": "Jun-25", "units": 7, "meters_reporting": 1}], "ytd_units": 1496, "ytd_amount": 34779, "ytd_months": 12, "avg_monthly_units": 125, "avg_monthly_amount": 2898}, {"name": "ARCHANA PRAKASH DAHIFALE", "address": "gat no 742 plot no 49 gade wasti HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524577472", "170524577481", "170524577499"], "connection_types": ["Residential 1-Ph"], "num_bills": 3, "num_meters": 3, "meter_details": [{"consumer_number": "170524577472", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 780.0, "units": 92, "history": [30, 20, 10, 9, 35, 33, 8, 282, 400, 6, 7, 7]}, {"consumer_number": "170524577481", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 640.0, "units": 73, "history": [73, 1317, 84, 5, 73, 75, 100, 50, 25, 29, 73, 50]}, {"consumer_number": "170524577499", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1250.0, "units": 43, "history": [43, 10, 1262, 20, 5, 43, 30, 20, 7, 5, 1250, 27]}], "current_month_bill": 2670, "current_month_units": 208, "monthly_combined": [{"month": "May-26", "units": 146, "meters_reporting": 3}, {"month": "Apr-26", "units": 1347, "meters_reporting": 3}, {"month": "Mar-26", "units": 1356, "meters_reporting": 3}, {"month": "Feb-26", "units": 34, "meters_reporting": 3}, {"month": "Jan-26", "units": 113, "meters_reporting": 3}, {"month": "Dec-25", "units": 151, "meters_reporting": 3}, {"month": "Nov-25", "units": 138, "meters_reporting": 3}, {"month": "Oct-25", "units": 352, "meters_reporting": 3}, {"month": "Sep-25", "units": 432, "meters_reporting": 3}, {"month": "Aug-25", "units": 40, "meters_reporting": 3}, {"month": "Jul-25", "units": 1330, "meters_reporting": 3}, {"month": "Jun-25", "units": 84, "meters_reporting": 3}], "ytd_units": 5523, "ytd_amount": 70896, "ytd_months": 12, "avg_monthly_units": 460, "avg_monthly_amount": 5908}, {"name": "S P MANGALE S A DUNDE", "address": "Wagholi, Pune 412207", "consumer_numbers": ["170521446911"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521446911", "connection_type": "Residential 1-Ph", "load_kw": 1.5, "bill_amount": 2480.0, "units": 141, "history": [25, 75, 100, 50, 26, 63, 31, 39, 62, 54, 96, 141]}], "current_month_bill": 2480, "current_month_units": 141, "monthly_combined": [{"month": "May-26", "units": 25, "meters_reporting": 1}, {"month": "Apr-26", "units": 75, "meters_reporting": 1}, {"month": "Mar-26", "units": 100, "meters_reporting": 1}, {"month": "Feb-26", "units": 50, "meters_reporting": 1}, {"month": "Jan-26", "units": 26, "meters_reporting": 1}, {"month": "Dec-25", "units": 63, "meters_reporting": 1}, {"month": "Nov-25", "units": 31, "meters_reporting": 1}, {"month": "Oct-25", "units": 39, "meters_reporting": 1}, {"month": "Sep-25", "units": 62, "meters_reporting": 1}, {"month": "Aug-25", "units": 54, "meters_reporting": 1}, {"month": "Jul-25", "units": 96, "meters_reporting": 1}, {"month": "Jun-25", "units": 141, "meters_reporting": 1}], "ytd_units": 762, "ytd_amount": 13403, "ytd_months": 12, "avg_monthly_units": 64, "avg_monthly_amount": 1117}, {"name": "RUPALI BHARAT SONAJE", "address": "FL.NO. 302 SWARN RESIDENCY oxy VILL PLOTTING HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521446938"], "connection_types": ["Residential"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521446938", "connection_type": "Residential", "load_kw": 1.5, "bill_amount": 2270.0, "units": 131, "history": [131, 8, 303, 400, 6, 7, 7, 5, 27, 5, 12, 6]}], "current_month_bill": 2270, "current_month_units": 131, "monthly_combined": [{"month": "May-26", "units": 131, "meters_reporting": 1}, {"month": "Apr-26", "units": 8, "meters_reporting": 1}, {"month": "Mar-26", "units": 303, "meters_reporting": 1}, {"month": "Feb-26", "units": 400, "meters_reporting": 1}, {"month": "Jan-26", "units": 6, "meters_reporting": 1}, {"month": "Dec-25", "units": 7, "meters_reporting": 1}, {"month": "Nov-25", "units": 7, "meters_reporting": 1}, {"month": "Oct-25", "units": 5, "meters_reporting": 1}, {"month": "Sep-25", "units": 27, "meters_reporting": 1}, {"month": "Aug-25", "units": 5, "meters_reporting": 1}, {"month": "Jul-25", "units": 12, "meters_reporting": 1}, {"month": "Jun-25", "units": 6, "meters_reporting": 1}], "ytd_units": 917, "ytd_amount": 15890, "ytd_months": 12, "avg_monthly_units": 76, "avg_monthly_amount": 1324}, {"name": "DHIRAJ SHARAD KADAM", "address": "GAT NO 742 oxy VILLA GADE WASTI HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521414459", "170521606471", "170521606480", "170521606498"], "connection_types": ["Residential 1-Ph", "Residential"], "num_bills": 4, "num_meters": 4, "meter_details": [{"consumer_number": "170521414459", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 300.0, "units": 22, "history": [22, 26, 5, 76, 5, 22, 25, 20, 15, 10, 5, 11]}, {"consumer_number": "170521606471", "connection_type": "Residential", "load_kw": 3.41, "bill_amount": 1170.0, "units": 126, "history": []}, {"consumer_number": "170521606498", "connection_type": "Residential", "load_kw": 3.41, "bill_amount": 0, "units": 10, "history": [10, 7, 300, 6, 7, 9, 9, 400, 7, 5, 80, 27]}, {"consumer_number": "170521606480", "connection_type": "Residential", "load_kw": 3.41, "bill_amount": 590.0, "units": 1602, "history": [25, 20, 50, 40, 100, 75, 125, 10, 39, 40]}], "current_month_bill": 2060, "current_month_units": 1760, "monthly_combined": [{"month": "May-26", "units": 57, "meters_reporting": 3}, {"month": "Apr-26", "units": 53, "meters_reporting": 3}, {"month": "Mar-26", "units": 355, "meters_reporting": 3}, {"month": "Feb-26", "units": 122, "meters_reporting": 3}, {"month": "Jan-26", "units": 112, "meters_reporting": 3}, {"month": "Dec-25", "units": 106, "meters_reporting": 3}, {"month": "Nov-25", "units": 159, "meters_reporting": 3}, {"month": "Oct-25", "units": 430, "meters_reporting": 3}, {"month": "Sep-25", "units": 61, "meters_reporting": 3}, {"month": "Aug-25", "units": 55, "meters_reporting": 3}, {"month": "Jul-25", "units": 85, "meters_reporting": 2}, {"month": "Jun-25", "units": 38, "meters_reporting": 2}], "ytd_units": 1633, "ytd_amount": 1911, "ytd_months": 12, "avg_monthly_units": 136, "avg_monthly_amount": 159}, {"name": "HEMA MANIK SHINDE", "address": "FLAT NO-302 SHREE RESIDENCY HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521444854"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521444854", "connection_type": "Residential 1-Ph", "load_kw": 3.93, "bill_amount": 1970.0, "units": 177, "history": []}], "current_month_bill": 1970, "current_month_units": 177, "monthly_combined": [{"month": "May-26", "units": 177, "meters_reporting": 1}], "ytd_units": 177, "ytd_amount": 1970, "ytd_months": 1, "avg_monthly_units": 177, "avg_monthly_amount": 1970}, {"name": "USHA GOPINATH KALE", "address": "GAT NO 742.F.NO 102 SAI TIRTHA APPARTMENT HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524604160"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170524604160", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 1520.0, "units": 149, "history": [150, 100, 50, 8, 368, 400, 6, 7, 7, 5, 27, 5]}], "current_month_bill": 1520, "current_month_units": 149, "monthly_combined": [{"month": "May-26", "units": 150, "meters_reporting": 1}, {"month": "Apr-26", "units": 100, "meters_reporting": 1}, {"month": "Mar-26", "units": 50, "meters_reporting": 1}, {"month": "Feb-26", "units": 8, "meters_reporting": 1}, {"month": "Jan-26", "units": 368, "meters_reporting": 1}, {"month": "Dec-25", "units": 400, "meters_reporting": 1}, {"month": "Nov-25", "units": 6, "meters_reporting": 1}, {"month": "Oct-25", "units": 7, "meters_reporting": 1}, {"month": "Sep-25", "units": 7, "meters_reporting": 1}, {"month": "Aug-25", "units": 5, "meters_reporting": 1}, {"month": "Jul-25", "units": 27, "meters_reporting": 1}, {"month": "Jun-25", "units": 5, "meters_reporting": 1}], "ytd_units": 1133, "ytd_amount": 11558, "ytd_months": 12, "avg_monthly_units": 94, "avg_monthly_amount": 963}, {"name": "VINAYAK ARUN GORADE", "address": "FLAT NO 401 SHREE RESIDENCY HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521444897"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521444897", "connection_type": "Residential 1-Ph", "load_kw": 3.93, "bill_amount": 1480.0, "units": 101, "history": [101, 7, 6, 93, 5, 101, 100, 75, 50, 25, 112, 76]}], "current_month_bill": 1480, "current_month_units": 101, "monthly_combined": [{"month": "May-26", "units": 101, "meters_reporting": 1}, {"month": "Apr-26", "units": 7, "meters_reporting": 1}, {"month": "Mar-26", "units": 6, "meters_reporting": 1}, {"month": "Feb-26", "units": 93, "meters_reporting": 1}, {"month": "Jan-26", "units": 5, "meters_reporting": 1}, {"month": "Dec-25", "units": 101, "meters_reporting": 1}, {"month": "Nov-25", "units": 100, "meters_reporting": 1}, {"month": "Oct-25", "units": 75, "meters_reporting": 1}, {"month": "Sep-25", "units": 50, "meters_reporting": 1}, {"month": "Aug-25", "units": 25, "meters_reporting": 1}, {"month": "Jul-25", "units": 112, "meters_reporting": 1}, {"month": "Jun-25", "units": 76, "meters_reporting": 1}], "ytd_units": 751, "ytd_amount": 11005, "ytd_months": 12, "avg_monthly_units": 63, "avg_monthly_amount": 917}, {"name": "ANNASAHEB GOPINATH KALE", "address": "GAT NO 742.F.NO 201 SAI TIRTHA APPARTMENT HAVELI PUNE Walati : 0817/HADAPSAR S/D", "consumer_numbers": ["170524604101", "170524604135", "170524607525"], "connection_types": ["Residential 1-Ph"], "num_bills": 3, "num_meters": 3, "meter_details": [{"consumer_number": "170524604101", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 680.0, "units": 77, "history": [10, 20, 30, 40, 50, 60, 63, 51]}, {"consumer_number": "170524604135", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 470.0, "units": 46, "history": [46, 25, 606, 75, 5, 46, 60, 50, 30, 40, 20, 10]}, {"consumer_number": "170524607525", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 230.0, "units": 13, "history": [10, 20, 30, 7, 5, 230, 27, 5, 230, 12, 6, 10]}], "current_month_bill": 1380, "current_month_units": 136, "monthly_combined": [{"month": "May-26", "units": 66, "meters_reporting": 3}, {"month": "Apr-26", "units": 65, "meters_reporting": 3}, {"month": "Mar-26", "units": 666, "meters_reporting": 3}, {"month": "Feb-26", "units": 122, "meters_reporting": 3}, {"month": "Jan-26", "units": 60, "meters_reporting": 3}, {"month": "Dec-25", "units": 336, "meters_reporting": 3}, {"month": "Nov-25", "units": 150, "meters_reporting": 3}, {"month": "Oct-25", "units": 106, "meters_reporting": 3}, {"month": "Sep-25", "units": 260, "meters_reporting": 2}, {"month": "Aug-25", "units": 52, "meters_reporting": 2}, {"month": "Jul-25", "units": 26, "meters_reporting": 2}, {"month": "Jun-25", "units": 20, "meters_reporting": 2}], "ytd_units": 1929, "ytd_amount": 19574, "ytd_months": 12, "avg_monthly_units": 161, "avg_monthly_amount": 1631}, {"name": "ANUPAM MEHROTRA", "address": "Gat No. 742 ;Plot No 40;41 oxy Villa Gade wasti wHAVELl PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524517135"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170524517135", "connection_type": "Residential 1-Ph", "load_kw": 0.67, "bill_amount": 1370.0, "units": 88, "history": []}], "current_month_bill": 1370, "current_month_units": 88, "monthly_combined": [{"month": "May-26", "units": 88, "meters_reporting": 1}], "ytd_units": 88, "ytd_amount": 1370, "ytd_months": 1, "avg_monthly_units": 88, "avg_monthly_amount": 1370}, {"name": "AMIT RAVINDRA RATHOD", "address": "G.No. 742; Gade Wasti HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521463727"], "connection_types": ["Commercial"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521463727", "connection_type": "Commercial", "load_kw": 2.0, "bill_amount": 1360.0, "units": 54, "history": [100, 125, 75, 25, 50, 300, 8, 261, 400, 62, 7, 7]}], "current_month_bill": 1360, "current_month_units": 54, "monthly_combined": [{"month": "May-26", "units": 100, "meters_reporting": 1}, {"month": "Apr-26", "units": 125, "meters_reporting": 1}, {"month": "Mar-26", "units": 75, "meters_reporting": 1}, {"month": "Feb-26", "units": 25, "meters_reporting": 1}, {"month": "Jan-26", "units": 50, "meters_reporting": 1}, {"month": "Dec-25", "units": 300, "meters_reporting": 1}, {"month": "Nov-25", "units": 8, "meters_reporting": 1}, {"month": "Oct-25", "units": 261, "meters_reporting": 1}, {"month": "Sep-25", "units": 400, "meters_reporting": 1}, {"month": "Aug-25", "units": 62, "meters_reporting": 1}, {"month": "Jul-25", "units": 7, "meters_reporting": 1}, {"month": "Jun-25", "units": 7, "meters_reporting": 1}], "ytd_units": 1420, "ytd_amount": 35763, "ytd_months": 12, "avg_monthly_units": 118, "avg_monthly_amount": 2980}, {"name": "RAJESH KUMAR SHAW", "address": "G.No CIN:U40109MH2005SGC153645 BILL NO.(GGN): 000003330284657 :82xxxxxx64 RAJESH", "consumer_numbers": ["170524594407", "170524594415"], "connection_types": ["Residential 1-Ph"], "num_bills": 2, "num_meters": 2, "meter_details": [{"consumer_number": "170524594407", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 500.0, "units": 49, "history": [30, 20, 10, 9, 31, 114, 49]}, {"consumer_number": "170524594415", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 780.0, "units": 92, "history": [92, 100, 75, 50, 25, 115, 113, 31, 32, 6, 7, 8]}], "current_month_bill": 1280, "current_month_units": 141, "monthly_combined": [{"month": "May-26", "units": 122, "meters_reporting": 2}, {"month": "Apr-26", "units": 120, "meters_reporting": 2}, {"month": "Mar-26", "units": 85, "meters_reporting": 2}, {"month": "Feb-26", "units": 59, "meters_reporting": 2}, {"month": "Jan-26", "units": 56, "meters_reporting": 2}, {"month": "Dec-25", "units": 229, "meters_reporting": 2}, {"month": "Nov-25", "units": 162, "meters_reporting": 2}, {"month": "Oct-25", "units": 31, "meters_reporting": 1}, {"month": "Sep-25", "units": 32, "meters_reporting": 1}, {"month": "Aug-25", "units": 6, "meters_reporting": 1}, {"month": "Jul-25", "units": 7, "meters_reporting": 1}, {"month": "Jun-25", "units": 8, "meters_reporting": 1}], "ytd_units": 917, "ytd_amount": 8325, "ytd_months": 12, "avg_monthly_units": 76, "avg_monthly_amount": 694}, {"name": "VAIBHAV ARUN GORADE", "address": "FLAT NO 201 SHREE RESIDENCY HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521444901"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521444901", "connection_type": "Residential 1-Ph", "load_kw": 3.93, "bill_amount": 1100.0, "units": 67, "history": [75, 50, 25, 71, 98, 27, 100, 300, 8, 290, 400, 6]}], "current_month_bill": 1100, "current_month_units": 67, "monthly_combined": [{"month": "May-26", "units": 75, "meters_reporting": 1}, {"month": "Apr-26", "units": 50, "meters_reporting": 1}, {"month": "Mar-26", "units": 25, "meters_reporting": 1}, {"month": "Feb-26", "units": 71, "meters_reporting": 1}, {"month": "Jan-26", "units": 98, "meters_reporting": 1}, {"month": "Dec-25", "units": 27, "meters_reporting": 1}, {"month": "Nov-25", "units": 100, "meters_reporting": 1}, {"month": "Oct-25", "units": 300, "meters_reporting": 1}, {"month": "Sep-25", "units": 8, "meters_reporting": 1}, {"month": "Aug-25", "units": 290, "meters_reporting": 1}, {"month": "Jul-25", "units": 400, "meters_reporting": 1}, {"month": "Jun-25", "units": 6, "meters_reporting": 1}], "ytd_units": 1450, "ytd_amount": 23806, "ytd_months": 12, "avg_monthly_units": 121, "avg_monthly_amount": 1984}, {"name": "E SUDHAKAR SHANKARRAO GADEKAR", "address": "G.No.742; Dreams NO-402; Gade WastHAVELl PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521554919"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521554919", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 1090.0, "units": 90, "history": [100, 75, 50, 25, 76, 93, 7, 5, 1090, 27, 5, 1100]}], "current_month_bill": 1090, "current_month_units": 90, "monthly_combined": [{"month": "May-26", "units": 100, "meters_reporting": 1}, {"month": "Apr-26", "units": 75, "meters_reporting": 1}, {"month": "Mar-26", "units": 50, "meters_reporting": 1}, {"month": "Feb-26", "units": 25, "meters_reporting": 1}, {"month": "Jan-26", "units": 76, "meters_reporting": 1}, {"month": "Dec-25", "units": 93, "meters_reporting": 1}, {"month": "Nov-25", "units": 7, "meters_reporting": 1}, {"month": "Oct-25", "units": 5, "meters_reporting": 1}, {"month": "Sep-25", "units": 1090, "meters_reporting": 1}, {"month": "Aug-25", "units": 27, "meters_reporting": 1}, {"month": "Jul-25", "units": 5, "meters_reporting": 1}, {"month": "Jun-25", "units": 1100, "meters_reporting": 1}], "ytd_units": 2653, "ytd_amount": 32131, "ytd_months": 12, "avg_monthly_units": 221, "avg_monthly_amount": 2678}, {"name": "PUSHPA SANDEEP BHANDARI", "address": "GAT NO. 741; BAKORI ROAD; HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521543798"], "connection_types": ["Commercial"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521543798", "connection_type": "Commercial", "load_kw": 5.0, "bill_amount": 1070.0, "units": 0, "history": [300, 6, 7, 9, 7, 400, 7, 5, 1070, 27, 5, 1080]}], "current_month_bill": 1070, "current_month_units": 0, "monthly_combined": [{"month": "May-26", "units": 300, "meters_reporting": 1}, {"month": "Apr-26", "units": 6, "meters_reporting": 1}, {"month": "Mar-26", "units": 7, "meters_reporting": 1}, {"month": "Feb-26", "units": 9, "meters_reporting": 1}, {"month": "Jan-26", "units": 7, "meters_reporting": 1}, {"month": "Dec-25", "units": 400, "meters_reporting": 1}, {"month": "Nov-25", "units": 7, "meters_reporting": 1}, {"month": "Oct-25", "units": 5, "meters_reporting": 1}, {"month": "Sep-25", "units": 1070, "meters_reporting": 1}, {"month": "Aug-25", "units": 27, "meters_reporting": 1}, {"month": "Jul-25", "units": 5, "meters_reporting": 1}, {"month": "Jun-25", "units": 1080, "meters_reporting": 1}], "ytd_units": 2923, "ytd_amount": 12840, "ytd_months": 12, "avg_monthly_units": 244, "avg_monthly_amount": 1070}, {"name": "MACHINDRA KESHAV GARJE", "address": "FLAT NO 101 SHREE RESIDENCY HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521444889"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521444889", "connection_type": "Residential 1-Ph", "load_kw": 3.93, "bill_amount": 860.0, "units": 2, "history": [6, 6, 93, 5, 100, 75, 50, 25, 6, 7, 7, 5]}], "current_month_bill": 860, "current_month_units": 2, "monthly_combined": [{"month": "May-26", "units": 6, "meters_reporting": 1}, {"month": "Apr-26", "units": 6, "meters_reporting": 1}, {"month": "Mar-26", "units": 93, "meters_reporting": 1}, {"month": "Feb-26", "units": 5, "meters_reporting": 1}, {"month": "Jan-26", "units": 100, "meters_reporting": 1}, {"month": "Dec-25", "units": 75, "meters_reporting": 1}, {"month": "Nov-25", "units": 50, "meters_reporting": 1}, {"month": "Oct-25", "units": 25, "meters_reporting": 1}, {"month": "Sep-25", "units": 6, "meters_reporting": 1}, {"month": "Aug-25", "units": 7, "meters_reporting": 1}, {"month": "Jul-25", "units": 7, "meters_reporting": 1}, {"month": "Jun-25", "units": 5, "meters_reporting": 1}], "ytd_units": 385, "ytd_amount": 165550, "ytd_months": 12, "avg_monthly_units": 32, "avg_monthly_amount": 13796}, {"name": "SATISH KAKASAHEB CHAVAN", "address": "G.NO. 742 NR. OXY PLOTTING HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521452008"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521452008", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 820.0, "units": 98, "history": [115, 141, 130, 122, 119, 117, 98]}], "current_month_bill": 820, "current_month_units": 98, "monthly_combined": [{"month": "May-26", "units": 115, "meters_reporting": 1}, {"month": "Apr-26", "units": 141, "meters_reporting": 1}, {"month": "Mar-26", "units": 130, "meters_reporting": 1}, {"month": "Feb-26", "units": 122, "meters_reporting": 1}, {"month": "Jan-26", "units": 119, "meters_reporting": 1}, {"month": "Dec-25", "units": 117, "meters_reporting": 1}, {"month": "Nov-25", "units": 98, "meters_reporting": 1}], "ytd_units": 842, "ytd_amount": 7045, "ytd_months": 7, "avg_monthly_units": 120, "avg_monthly_amount": 1006}, {"name": "MANIK NAMDEO SHINDE", "address": "FLAT NO-102 SHREE RESIDENCY HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521444871"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521444871", "connection_type": "Residential 1-Ph", "load_kw": 3.93, "bill_amount": 790.0, "units": 94, "history": [94, 7, 6, 93, 5, 94, 100, 75, 50, 25, 8, 287]}], "current_month_bill": 790, "current_month_units": 94, "monthly_combined": [{"month": "May-26", "units": 94, "meters_reporting": 1}, {"month": "Apr-26", "units": 7, "meters_reporting": 1}, {"month": "Mar-26", "units": 6, "meters_reporting": 1}, {"month": "Feb-26", "units": 93, "meters_reporting": 1}, {"month": "Jan-26", "units": 5, "meters_reporting": 1}, {"month": "Dec-25", "units": 94, "meters_reporting": 1}, {"month": "Nov-25", "units": 100, "meters_reporting": 1}, {"month": "Oct-25", "units": 75, "meters_reporting": 1}, {"month": "Sep-25", "units": 50, "meters_reporting": 1}, {"month": "Aug-25", "units": 25, "meters_reporting": 1}, {"month": "Jul-25", "units": 8, "meters_reporting": 1}, {"month": "Jun-25", "units": 287, "meters_reporting": 1}], "ytd_units": 844, "ytd_amount": 7093, "ytd_months": 12, "avg_monthly_units": 70, "avg_monthly_amount": 591}, {"name": "SHARAD ANANDRAO DUNDE", "address": "Wagholi, Pune 412207", "consumer_numbers": ["170521447021"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521447021", "connection_type": "Residential 1-Ph", "load_kw": 1.5, "bill_amount": 700.0, "units": 78, "history": [100, 25, 75, 50, 107, 118, 119, 91, 103, 110, 98, 110]}], "current_month_bill": 700, "current_month_units": 78, "monthly_combined": [{"month": "May-26", "units": 100, "meters_reporting": 1}, {"month": "Apr-26", "units": 25, "meters_reporting": 1}, {"month": "Mar-26", "units": 75, "meters_reporting": 1}, {"month": "Feb-26", "units": 50, "meters_reporting": 1}, {"month": "Jan-26", "units": 107, "meters_reporting": 1}, {"month": "Dec-25", "units": 118, "meters_reporting": 1}, {"month": "Nov-25", "units": 119, "meters_reporting": 1}, {"month": "Oct-25", "units": 91, "meters_reporting": 1}, {"month": "Sep-25", "units": 103, "meters_reporting": 1}, {"month": "Aug-25", "units": 110, "meters_reporting": 1}, {"month": "Jul-25", "units": 98, "meters_reporting": 1}, {"month": "Jun-25", "units": 110, "meters_reporting": 1}], "ytd_units": 1106, "ytd_amount": 9926, "ytd_months": 12, "avg_monthly_units": 92, "avg_monthly_amount": 827}, {"name": "VASIM SHAUKAT TAMBOLI", "address": "G.NO. 742 NR. oxy PLOTTING HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521451991"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521451991", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 660.0, "units": 74, "history": [74, 50, 75, 100, 25, 79, 21, 40, 8, 311, 400, 62]}], "current_month_bill": 660, "current_month_units": 74, "monthly_combined": [{"month": "May-26", "units": 74, "meters_reporting": 1}, {"month": "Apr-26", "units": 50, "meters_reporting": 1}, {"month": "Mar-26", "units": 75, "meters_reporting": 1}, {"month": "Feb-26", "units": 100, "meters_reporting": 1}, {"month": "Jan-26", "units": 25, "meters_reporting": 1}, {"month": "Dec-25", "units": 79, "meters_reporting": 1}, {"month": "Nov-25", "units": 21, "meters_reporting": 1}, {"month": "Oct-25", "units": 40, "meters_reporting": 1}, {"month": "Sep-25", "units": 8, "meters_reporting": 1}, {"month": "Aug-25", "units": 311, "meters_reporting": 1}, {"month": "Jul-25", "units": 400, "meters_reporting": 1}, {"month": "Jun-25", "units": 62, "meters_reporting": 1}], "ytd_units": 1245, "ytd_amount": 11104, "ytd_months": 12, "avg_monthly_units": 104, "avg_monthly_amount": 925}, {"name": "BHOITE", "address": "FLAT NO 303 GAT NO 724 oxy SOCIETY GADE VASTI WAHAVELI PUNE Wagholi (CT) : 0817/", "consumer_numbers": ["170521723630"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521723630", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 640.0, "units": 74, "history": []}], "current_month_bill": 640, "current_month_units": 74, "monthly_combined": [{"month": "May-26", "units": 74, "meters_reporting": 1}], "ytd_units": 74, "ytd_amount": 640, "ytd_months": 1, "avg_monthly_units": 74, "avg_monthly_amount": 640}, {"name": "ATUL PURUSHOTAM PITRUBHAKTA", "address": "G.NO. 741/742 oxy VILA GADE WASTI HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170524514110"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170524514110", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 580.0, "units": 30, "history": [30, 10, 20, 30, 16, 21, 23, 28, 31, 37, 12, 6]}], "current_month_bill": 580, "current_month_units": 30, "monthly_combined": [{"month": "May-26", "units": 30, "meters_reporting": 1}, {"month": "Apr-26", "units": 10, "meters_reporting": 1}, {"month": "Mar-26", "units": 20, "meters_reporting": 1}, {"month": "Feb-26", "units": 30, "meters_reporting": 1}, {"month": "Jan-26", "units": 16, "meters_reporting": 1}, {"month": "Dec-25", "units": 21, "meters_reporting": 1}, {"month": "Nov-25", "units": 23, "meters_reporting": 1}, {"month": "Oct-25", "units": 28, "meters_reporting": 1}, {"month": "Sep-25", "units": 31, "meters_reporting": 1}, {"month": "Aug-25", "units": 37, "meters_reporting": 1}, {"month": "Jul-25", "units": 12, "meters_reporting": 1}, {"month": "Jun-25", "units": 6, "meters_reporting": 1}], "ytd_units": 264, "ytd_amount": 5104, "ytd_months": 12, "avg_monthly_units": 22, "avg_monthly_amount": 425}, {"name": "KOTTAKALATHIT SANOOJ", "address": "GAT NO. 741; BAKORI ROAD; HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521543780"], "connection_types": ["Commercial"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521543780", "connection_type": "Commercial", "load_kw": 5.0, "bill_amount": 530.0, "units": 0, "history": [300, 6, 7, 9, 6, 400, 7, 5, 530, 27, 5, 540]}], "current_month_bill": 530, "current_month_units": 0, "monthly_combined": [{"month": "May-26", "units": 300, "meters_reporting": 1}, {"month": "Apr-26", "units": 6, "meters_reporting": 1}, {"month": "Mar-26", "units": 7, "meters_reporting": 1}, {"month": "Feb-26", "units": 9, "meters_reporting": 1}, {"month": "Jan-26", "units": 6, "meters_reporting": 1}, {"month": "Dec-25", "units": 400, "meters_reporting": 1}, {"month": "Nov-25", "units": 7, "meters_reporting": 1}, {"month": "Oct-25", "units": 5, "meters_reporting": 1}, {"month": "Sep-25", "units": 530, "meters_reporting": 1}, {"month": "Aug-25", "units": 27, "meters_reporting": 1}, {"month": "Jul-25", "units": 5, "meters_reporting": 1}, {"month": "Jun-25", "units": 540, "meters_reporting": 1}], "ytd_units": 1842, "ytd_amount": 6360, "ytd_months": 12, "avg_monthly_units": 154, "avg_monthly_amount": 530}, {"name": "GAT NO", "address": "Flat no 101 GAT NO 742 oxy SOCIETY GADE VASTI WAHAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521720134", "170521723656"], "connection_types": ["Residential 1-Ph"], "num_bills": 2, "num_meters": 2, "meter_details": [{"consumer_number": "170521723656", "connection_type": "Residential 1-Ph", "load_kw": 0, "bill_amount": 190.0, "units": 5, "history": []}, {"consumer_number": "170521720134", "connection_type": "Residential 1-Ph", "load_kw": 1.0, "bill_amount": 270.0, "units": 19, "history": []}], "current_month_bill": 460, "current_month_units": 24, "monthly_combined": [{"month": "May-26", "units": 24, "meters_reporting": 2}], "ytd_units": 24, "ytd_amount": 460, "ytd_months": 1, "avg_monthly_units": 24, "avg_monthly_amount": 460}, {"name": "SUDHIR P MANGALE AND SHARAD A DUNDE P", "address": "FL.NO. 401 SWARN RESIDENCY oxy VILL PLOTTING HAVELI PUNE Wagholi (CT) 412207", "consumer_numbers": ["170521447039"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521447039", "connection_type": "Residential 1-Ph", "load_kw": 1.5, "bill_amount": 290.0, "units": 21, "history": [21, 25, 6, 7, 50, 26, 5, 21, 75, 50, 300, 8]}], "current_month_bill": 290, "current_month_units": 21, "monthly_combined": [{"month": "May-26", "units": 21, "meters_reporting": 1}, {"month": "Apr-26", "units": 25, "meters_reporting": 1}, {"month": "Mar-26", "units": 6, "meters_reporting": 1}, {"month": "Feb-26", "units": 7, "meters_reporting": 1}, {"month": "Jan-26", "units": 50, "meters_reporting": 1}, {"month": "Dec-25", "units": 26, "meters_reporting": 1}, {"month": "Nov-25", "units": 5, "meters_reporting": 1}, {"month": "Oct-25", "units": 21, "meters_reporting": 1}, {"month": "Sep-25", "units": 75, "meters_reporting": 1}, {"month": "Aug-25", "units": 50, "meters_reporting": 1}, {"month": "Jul-25", "units": 300, "meters_reporting": 1}, {"month": "Jun-25", "units": 8, "meters_reporting": 1}], "ytd_units": 594, "ytd_amount": 8203, "ytd_months": 12, "avg_monthly_units": 50, "avg_monthly_amount": 684}, {"name": "E PANKAJ KUMAR", "address": "GAT NO. 742; PLOT NO. 12; FLAT NO. 202; OXY VILLAHAVELI PUNE Wagholi (CT) : 0817", "consumer_numbers": ["170521473188"], "connection_types": ["Residential 1-Ph"], "num_bills": 1, "num_meters": 1, "meter_details": [{"consumer_number": "170521473188", "connection_type": "Residential 1-Ph", "load_kw": 2.0, "bill_amount": 270.0, "units": 17, "history": [17, 17, 50, 75, 300, 8, 340, 400, 6, 7, 7, 5]}], "current_month_bill": 270, "current_month_units": 17, "monthly_combined": [{"month": "May-26", "units": 17, "meters_reporting": 1}, {"month": "Apr-26", "units": 17, "meters_reporting": 1}, {"month": "Mar-26", "units": 50, "meters_reporting": 1}, {"month": "Feb-26", "units": 75, "meters_reporting": 1}, {"month": "Jan-26", "units": 300, "meters_reporting": 1}, {"month": "Dec-25", "units": 8, "meters_reporting": 1}, {"month": "Nov-25", "units": 340, "meters_reporting": 1}, {"month": "Oct-25", "units": 400, "meters_reporting": 1}, {"month": "Sep-25", "units": 6, "meters_reporting": 1}, {"month": "Aug-25", "units": 7, "meters_reporting": 1}, {"month": "Jul-25", "units": 7, "meters_reporting": 1}, {"month": "Jun-25", "units": 5, "meters_reporting": 1}], "ytd_units": 1232, "ytd_amount": 19567, "ytd_months": 12, "avg_monthly_units": 103, "avg_monthly_amount": 1631}];
+const MONTHS = ["May-26", "Apr-26", "Mar-26", "Feb-26", "Jan-26", "Dec-25", "Nov-25", "Oct-25", "Sep-25", "Aug-25", "Jul-25", "Jun-25"];
+
+function showCustomer(idx) {
+    const d = customers[idx];
+    document.getElementById('summary-view').style.display = 'none';
+    document.getElementById('detail-view').style.display = 'block';
+
+    let h = `<button class="back-btn" onclick="goBack()">Back to All Customers</button>`;
+    h += `<div class="cust-h"><h2>${d.name}</h2>`;
+    h += `<p class="sub">Address: ${d.address}</p>`;
+    h += `<p class="sub">Consumer No(s): <strong>${d.consumer_numbers.join(', ')}</strong></p>`;
+    h += `<p class="sub">Connection: ${d.connection_types.join(', ')||'Residential'} | Bills in May-26: <strong>${d.num_bills}</strong> (across ${d.num_meters} meter(s))</p></div>`;
+
+    h += `<div class="info-grid">
+        <div class="ib"><div class="lbl">May-26 Bill Amount</div><div class="val o">&#8377;${d.current_month_bill.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">May-26 Units</div><div class="val b">${d.current_month_units}</div></div>
+        <div class="ib"><div class="lbl">YTD Total Units</div><div class="val g">${d.ytd_units.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">YTD Total Amount</div><div class="val ytd-color">&#8377;${d.ytd_amount.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">Months of Data</div><div class="val">${d.ytd_months}</div></div>
+        <div class="ib"><div class="lbl">Avg Monthly Units</div><div class="val">${d.avg_monthly_units}</div></div>
+        <div class="ib"><div class="lbl">Avg Monthly Amount</div><div class="val o">&#8377;${d.avg_monthly_amount.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">No. of Meters</div><div class="val">${d.num_meters}</div></div>
+    </div>`;
+
+    // Monthly combined chart
+    if (d.monthly_combined && d.monthly_combined.length > 0) {
+        h += `<h3 class="hist-title">Monthly Consumption (All Meters Combined)</h3>`;
+        const maxU = Math.max(...d.monthly_combined.map(m=>m.units));
+        d.monthly_combined.forEach(m => {
+            const pct = maxU > 0 ? (m.units/maxU*100) : 0;
+            h += `<div class="hr">
+                <span class="mo">${m.month}</span>
+                <div class="track"><div class="fill" style="width:${pct}%">${m.units}</div></div>
+                <span class="uval">${m.units} units</span>
+            </div>`;
+        });
+    }
+
+    // Per-meter details
+    h += `<h3 class="hist-title" style="margin-top:20px;">Meter-wise Details</h3>`;
+    d.meter_details.forEach((m, mi) => {
+        h += `<div class="meter-block">
+            <div class="meter-hdr">
+                <span class="badge">Meter ${mi+1}</span>
+                <span class="cno">${m.consumer_number}</span>
+                <span class="typ">${m.connection_type} | ${m.load_kw||'-'} KW</span>
+            </div>
+            <div class="meter-body">
+                <div class="meter-stats">
+                    <div class="ms"><div class="ms-l">May-26 Bill</div><div class="ms-v" style="color:var(--orange);">&#8377;${m.bill_amount.toLocaleString('en-IN')}</div></div>
+                    <div class="ms"><div class="ms-l">May-26 Units</div><div class="ms-v" style="color:var(--blue);">${m.units} kWh</div></div>
+                </div>`;
+
+        // Per-meter history
+        if (m.history && m.history.length > 0) {
+            const mMax = Math.max(...m.history);
+            h += `<div class="hist-title" style="font-size:0.82em;">Monthly History (this meter)</div>`;
+            m.history.forEach((u, idx) => {
+                const mo = idx < MONTHS.length ? MONTHS[idx] : 'M-'+(idx+1);
+                const p = mMax > 0 ? (u/mMax*100) : 0;
+                h += `<div class="hr">
+                    <span class="mo">${mo}</span>
+                    <div class="track"><div class="fill" style="width:${p}%">${u}</div></div>
+                    <span class="uval">${u} u</span>
+                </div>`;
+            });
+        }
+        h += `</div></div>`;
+    });
+
+    h += `<div class="note"><strong>Note:</strong> YTD units are extracted from the monthly bar chart printed on each MSEDCL bill. Bill amount shown is the actual amount from the bill. Monthly history shows units consumed per month per meter as reported by MSEDCL.</div>`;
+
+    // --- SOLAR RECOMMENDATION ---
+    const avgUnits = d.avg_monthly_units || d.current_month_units;
+    const avgBill = d.avg_monthly_amount || d.current_month_bill;
+    const annualUnits = avgUnits * 12;
+    const annualBill = avgBill * 12;
+
+    // Recommend system size based on consumption
+    let sysSize = 3; // default 3kW
+    if (avgUnits > 500) sysSize = 5;
+    else if (avgUnits > 300) sysSize = 3;
+    else if (avgUnits > 150) sysSize = 2;
+    else sysSize = 1;
+
+    const costPerKw = 37333; // 1,12,000 / 3 = 37,333 per kW
+    const systemCost = sysSize * costPerKw;
+    const dailyGen = sysSize * 4; // 4 units/kW/day for Pune
+    const monthlyGen = dailyGen * 30;
+    const annualGen = dailyGen * 365;
+    const monthlySaving = Math.min(monthlyGen, avgUnits) * (avgBill / avgUnits || 8.5);
+    const annualSaving = monthlySaving * 12;
+    const paybackYears = systemCost > 0 ? (systemCost / annualSaving).toFixed(1) : '-';
+    const saving25yr = Math.round(annualSaving * 25 * 1.3 - systemCost); // 30% extra due to tariff hikes
+    const coveragePct = avgUnits > 0 ? Math.min(100, Math.round(monthlyGen / avgUnits * 100)) : 100;
+
+    h += `<div class="solar-rec">
+        <div class="solar-rec-header">
+            <h3>Kalpdev Solar - Recommendation for ${d.name}</h3>
+            <p>Based on your electricity consumption analysis</p>
+        </div>
+        <div class="solar-rec-grid">
+            <div class="sr-item"><div class="sr-label">Recommended System</div><div class="sr-value">${sysSize} kW</div></div>
+            <div class="sr-item"><div class="sr-label">System Cost</div><div class="sr-value">&#8377;${systemCost.toLocaleString('en-IN')}</div></div>
+            <div class="sr-item"><div class="sr-label">Monthly Generation</div><div class="sr-value">${monthlyGen} units</div></div>
+            <div class="sr-item"><div class="sr-label">Your Avg Consumption</div><div class="sr-value">${avgUnits} units/mo</div></div>
+            <div class="sr-item"><div class="sr-label">Coverage</div><div class="sr-value" style="color:${coveragePct>=80?'#3fb950':'#ffab00'}">${coveragePct}%</div></div>
+            <div class="sr-item"><div class="sr-label">Monthly Savings</div><div class="sr-value" style="color:#3fb950;">&#8377;${Math.round(monthlySaving).toLocaleString('en-IN')}</div></div>
+            <div class="sr-item"><div class="sr-label">Annual Savings</div><div class="sr-value" style="color:#3fb950;">&#8377;${Math.round(annualSaving).toLocaleString('en-IN')}</div></div>
+            <div class="sr-item"><div class="sr-label">Payback Period</div><div class="sr-value">${paybackYears} years</div></div>
+        </div>
+        <div class="solar-savings-box">
+            <div class="ssb-row">
+                <div class="ssb-item"><div class="ssb-label">You currently pay MSEDCL</div><div class="ssb-value" style="color:#f85149;">&#8377;${annualBill.toLocaleString('en-IN')}/year</div></div>
+                <div class="ssb-item"><div class="ssb-label">With Kalpdev Solar you save</div><div class="ssb-value" style="color:#3fb950;">&#8377;${Math.round(annualSaving).toLocaleString('en-IN')}/year</div></div>
+                <div class="ssb-item"><div class="ssb-label">25-Year Net Profit</div><div class="ssb-value" style="color:#ffd700;">&#8377;${saving25yr.toLocaleString('en-IN')}</div></div>
+            </div>
+        </div>
+        <div class="solar-benefits">
+            <h4>Why switch to Solar?</h4>
+            <ul>
+                <li>Zero electricity bills - generate your own power for 25+ years</li>
+                <li>Net Metering - sell excess power back to MSEDCL grid</li>
+                <li>Protection from 5-8% annual tariff hikes by MSEDCL</li>
+                <li>Increase property value by 3-4%</li>
+                <li>Reduce ~${(sysSize * 1.4).toFixed(1)} tonnes CO2 emissions per year</li>
+            </ul>
+        </div>
+        <div class="solar-cta">
+            <p><strong>Kalpdev Solar</strong> | solar-panel-india.com</p>
+            <p>FREE site survey & customized proposal for your rooftop</p>
+        </div>
+    </div>`;
+
+    document.getElementById('detail-content').innerHTML = h;
+    window.scrollTo(0,0);
+}
+
+function goBack() {
+    document.getElementById('detail-view').style.display='none';
+    document.getElementById('summary-view').style.display='block';
+    window.scrollTo(0,0);
+}
+
+function searchCustomer() {
+    const query = document.getElementById('searchInput').value.toLowerCase();
+    if (!query) {
+        document.querySelectorAll('.row-click').forEach(r => r.style.display = '');
+        return;
+    }
+    if (document.getElementById('detail-view').style.display === 'block') {
+        goBack();
+    }
+    document.querySelectorAll('.row-click').forEach(r => {
+        const name = r.querySelector('td:nth-child(2)').textContent.toLowerCase();
+        const cno = r.querySelector('td:nth-child(3)').textContent.toLowerCase();
+        r.style.display = (name.includes(query) || cno.includes(query)) ? '' : 'none';
+    });
+    const visible = [...document.querySelectorAll('.row-click')].filter(r => r.style.display !== 'none');
+    if (visible.length === 1 && query.length > 2) {
+        visible[0].click();
+    }
+}
+
+// --- BILL UPLOAD & OCR ---
+let tesseractLoaded = false;
+
+function handleUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const progress = document.getElementById('uploadProgress');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const resultDiv = document.getElementById('uploadResult');
+    progress.style.display = 'block';
+    resultDiv.style.display = 'none';
+    progressFill.style.width = '10%';
+    progressFill.style.background = 'linear-gradient(90deg,var(--orange),#ffd700)';
+    progressText.textContent = 'Loading OCR engine...';
+    if (!tesseractLoaded) {
+        const s = document.createElement('script');
+        s.src = 'https://unpkg.com/tesseract.js@2.1.5/dist/tesseract.min.js';
+        s.onload = () => { tesseractLoaded = true; processImage(file); };
+        s.onerror = () => { 
+            progressText.textContent = 'Cannot load OCR engine. If on corporate network, try from your phone or home wifi.'; 
+            progressFill.style.width = '100%';
+            progressFill.style.background = '#f85149'; 
+        };
+        document.head.appendChild(s);
+    } else { processImage(file); }
+}
+
+async function processImage(file) {
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    const resultDiv = document.getElementById('uploadResult');
+    progressFill.style.width = '30%';
+    progressText.textContent = 'Reading bill image...';
+    try {
+        const result = await Tesseract.recognize(file, 'eng', {
+            logger: m => {
+                if (m.status === 'recognizing text') {
+                    const pct = Math.round(30 + m.progress * 60);
+                    progressFill.style.width = pct + '%';
+                    progressText.textContent = 'Extracting text... ' + pct + '%';
+                }
+            }
+        });
+        progressFill.style.width = '95%';
+        progressText.textContent = 'Analyzing...';
+        const text = result.data.text;
+        const analysis = analyzeBillText(text);
+        progressFill.style.width = '100%';
+        progressText.textContent = 'Done!';
+        resultDiv.style.display = 'block';
+        resultDiv.innerHTML = renderUploadResult(analysis);
+    } catch (err) {
+        progressFill.style.width = '100%';
+        progressFill.style.background = '#f85149';
+        progressText.textContent = 'Error: ' + (err.message || String(err));
+    }
+}
+
+function analyzeBillText(text) {
+    const d = {};
+    let nm = text.match(/:\d{2}x{4,6}\d{2}\s+([A-Z][A-Za-z\s.]+?)(?:\s+(?:GAT|G\.NO|FLAT|FL|gat|Gat))/);
+    if (!nm) nm = text.match(/MONTH OF[\s\S]*?([A-Z][A-Za-z\s.]{4,35}?)(?:\s+(?:GAT|G\.NO|FLAT|FL|742))/);
+    d.name = nm ? nm[1].trim() : 'Customer';
+    const cn = text.match(/(17\d{10})/);
+    d.consumer_number = cn ? cn[1] : 'N/A';
+    d.bill_amount = 0;
+    const amounts = [...text.matchAll(/(\d{2})-(\d{2})-(20\d{2})\s+(\d+\.?\d*)/g)];
+    for (const m of amounts) { const a = parseFloat(m[4]); if (a >= 100 && a <= 25000) { d.bill_amount = a; break; } }
+    d.units = 0;
+    const um = text.match(/(\d{3,6})\s+(\d{3,6})[\s\S]*?1\.00\s+(\d{1,4})/);
+    if (um) { const u = parseInt(um[3]); if (u >= 1 && u <= 3000) d.units = u; }
+    if (!d.units) { const um2 = text.match(/02-04-2026\s+(\d{1,4})/); if (um2) { const u = parseInt(um2[1]); if (u >= 1 && u <= 3000) d.units = u; } }
+    if (!d.units) { const um3 = text.match(/(\d{1,4})\s+(?:\d{3,6}\s+)*Meter Status/); if (um3) { const u = parseInt(um3[1]); if (u >= 1 && u <= 3000) d.units = u; } }
+    d.connection = text.includes('Comm IPh') ? 'Commercial' : 'Residential';
+    d.history = [];
+    const hm = text.match(/((?:\d{1,4}\s+){2,8})2025\s*-\s*2026\s+((?:\d{1,4}\s*){1,4})/);
+    if (hm) {
+        const before = hm[1].match(/\d{1,4}/g) || [];
+        const after = hm[2].match(/\d{1,4}/g) || [];
+        [...after, ...before].forEach(n => { const v = parseInt(n); if (v >= 5 && v <= 1500 && v !== 2025 && v !== 2026) d.history.push(v); });
+    }
+    const lm = text.match(/:\s*(\d+\.?\d*)\s*KW/);
+    d.load = lm ? parseFloat(lm[1]) : 0;
+    if (d.load > 50) d.load = 0;
+    return d;
+}
+
+function renderUploadResult(d) {
+    const avgUnits = d.history.length > 0 ? Math.round(d.history.reduce((a,b)=>a+b,0)/d.history.length) : d.units;
+    const avgBill = d.bill_amount > 0 && d.units > 0 ? Math.round((d.bill_amount / d.units) * avgUnits) : d.bill_amount;
+    const annualBill = avgBill * 12;
+    const ytdUnits = d.history.length > 0 ? d.history.reduce((a,b)=>a+b,0) : d.units;
+    const ytdAmount = d.units > 0 ? Math.round((d.bill_amount / d.units) * ytdUnits) : d.bill_amount;
+    let sysSize = 3;
+    if (avgUnits > 500) sysSize = 5; else if (avgUnits > 300) sysSize = 3; else if (avgUnits > 150) sysSize = 2; else sysSize = 1;
+    const systemCost = sysSize * 37333;
+    const monthlyGen = sysSize * 4 * 30;
+    const ratePerUnit = d.units > 0 ? d.bill_amount / d.units : 8.5;
+    const monthlySaving = Math.min(monthlyGen, avgUnits) * ratePerUnit;
+    const annualSaving = monthlySaving * 12;
+    const payback = annualSaving > 0 ? (systemCost / annualSaving).toFixed(1) : '-';
+    const saving25yr = Math.round(annualSaving * 25 * 1.3 - systemCost);
+    const coverage = avgUnits > 0 ? Math.min(100, Math.round(monthlyGen / avgUnits * 100)) : 100;
+
+    let h = `<div class="upload-result-card"><h3 style="color:var(--orange);margin-bottom:15px;">Bill Analysis: ${d.name}</h3>`;
+    h += `<div class="info-grid">
+        <div class="ib"><div class="lbl">Customer</div><div class="val">${d.name}</div></div>
+        <div class="ib"><div class="lbl">Consumer No</div><div class="val b" style="font-family:monospace;">${d.consumer_number}</div></div>
+        <div class="ib"><div class="lbl">Connection</div><div class="val">${d.connection}</div></div>
+        <div class="ib"><div class="lbl">Load</div><div class="val">${d.load} KW</div></div>
+        <div class="ib"><div class="lbl">Current Bill</div><div class="val o">&#8377;${d.bill_amount.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">Current Units</div><div class="val b">${d.units}</div></div>
+        <div class="ib"><div class="lbl">YTD Units</div><div class="val g">${ytdUnits.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">YTD Amount</div><div class="val ytd-color">&#8377;${ytdAmount.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">Avg Units/Mo</div><div class="val">${avgUnits}</div></div>
+        <div class="ib"><div class="lbl">Avg Bill/Mo</div><div class="val o">&#8377;${avgBill.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">Annual Bill</div><div class="val o">&#8377;${annualBill.toLocaleString('en-IN')}</div></div>
+        <div class="ib"><div class="lbl">Months Data</div><div class="val">${d.history.length || 1}</div></div>
+    </div>`;
+    if (d.history.length > 0) {
+        const MO = ['May-26','Apr-26','Mar-26','Feb-26','Jan-26','Dec-25','Nov-25','Oct-25','Sep-25','Aug-25','Jul-25','Jun-25'];
+        const maxU = Math.max(...d.history);
+        h += `<h4 class="hist-title">Monthly History</h4>`;
+        d.history.forEach((u, i) => {
+            const mo = i < MO.length ? MO[i] : 'M-'+(i+1);
+            const p = maxU > 0 ? (u/maxU*100) : 0;
+            h += `<div class="hr"><span class="mo">${mo}</span><div class="track"><div class="fill" style="width:${p}%">${u}</div></div><span class="uval">${u} u</span></div>`;
+        });
+    }
+    h += `<div class="solar-rec" style="margin-top:20px;">
+        <div class="solar-rec-header"><h3>Kalpdev Solar - Recommendation</h3><p>Based on your consumption analysis</p></div>
+        <div class="solar-rec-grid">
+            <div class="sr-item"><div class="sr-label">System Size</div><div class="sr-value">${sysSize} kW</div></div>
+            <div class="sr-item"><div class="sr-label">Cost</div><div class="sr-value">&#8377;${systemCost.toLocaleString('en-IN')}</div></div>
+            <div class="sr-item"><div class="sr-label">Monthly Gen</div><div class="sr-value">${monthlyGen} units</div></div>
+            <div class="sr-item"><div class="sr-label">Coverage</div><div class="sr-value" style="color:${coverage>=80?'#3fb950':'#ffab00'}">${coverage}%</div></div>
+            <div class="sr-item"><div class="sr-label">Monthly Save</div><div class="sr-value" style="color:#3fb950;">&#8377;${Math.round(monthlySaving).toLocaleString('en-IN')}</div></div>
+            <div class="sr-item"><div class="sr-label">Annual Save</div><div class="sr-value" style="color:#3fb950;">&#8377;${Math.round(annualSaving).toLocaleString('en-IN')}</div></div>
+            <div class="sr-item"><div class="sr-label">Payback</div><div class="sr-value">${payback} yrs</div></div>
+            <div class="sr-item"><div class="sr-label">25-Yr Profit</div><div class="sr-value" style="color:#ffd700;">&#8377;${saving25yr.toLocaleString('en-IN')}</div></div>
+        </div>
+        <div class="solar-savings-box"><div class="ssb-row">
+            <div class="ssb-item"><div class="ssb-label">You pay MSEDCL</div><div class="ssb-value" style="color:#f85149;">&#8377;${annualBill.toLocaleString('en-IN')}/yr</div></div>
+            <div class="ssb-item"><div class="ssb-label">With Kalpdev Solar</div><div class="ssb-value" style="color:#3fb950;">Save &#8377;${Math.round(annualSaving).toLocaleString('en-IN')}/yr</div></div>
+            <div class="ssb-item"><div class="ssb-label">25-Year Profit</div><div class="ssb-value" style="color:#ffd700;">&#8377;${saving25yr.toLocaleString('en-IN')}</div></div>
+        </div></div>
+        <div class="solar-cta"><p><strong>Kalpdev Solar</strong> | solar-panel-india.com</p><p>FREE site survey & customized proposal</p></div>
+    </div>`;
+    h += `</div>`;
+    return h;
+}
+
+// Drag & drop
+document.addEventListener('DOMContentLoaded', () => {
+    const area = document.getElementById('uploadArea');
+    if (!area) return;
+    area.addEventListener('dragover', e => { e.preventDefault(); area.querySelector('.upload-box').style.borderColor = 'var(--orange)'; });
+    area.addEventListener('dragleave', () => { area.querySelector('.upload-box').style.borderColor = ''; });
+    area.addEventListener('drop', e => {
+        e.preventDefault();
+        area.querySelector('.upload-box').style.borderColor = '';
+        if (e.dataTransfer.files.length) {
+            document.getElementById('billUpload').files = e.dataTransfer.files;
+            handleUpload({target: {files: e.dataTransfer.files}});
+        }
+    });
+});
+</script>
+</body>
+</html>
