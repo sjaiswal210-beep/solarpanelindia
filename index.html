@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="ooVOst_5FRRqDeiKjIjMo2ZR-JQYR1n8tGRRxghWwOAi" />
     <title>KalpDev Solar | #1 Solar Rooftop Installation in Pune | Rooftop Solar Panel India</title>
     <meta name="description" content="KalpDev Solar — Pune's trusted rooftop solar brand. Best solar rooftop installation for homes, societies & industries. Government subsidy support, 35 years service. Offices in Kharadi & Wagholi. Call 7350785606">
     <meta name="keywords" content="solar rooftop pune, rooftop solar panel installation pune, solar rooftop india, rooftop solar system pune, solar panel rooftop price, best rooftop solar company pune, solar rooftop subsidy maharashtra, rooftop solar for home pune">
@@ -17,6 +18,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="new-sections.css">
 </head>
 <body>
 
@@ -725,6 +727,257 @@
     </section>
 
 
+    <!-- ===== ELECTRICITY BILL ANALYZER ===== -->
+    <section class="bill-analyzer-section" id="bill-analyzer">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag text-green">AI-Powered</div>
+                <h2>Upload Your <span class="text-amber">Electricity Bill</span></h2>
+                <p>Our AI instantly analyzes your bill and recommends the perfect solar system for your home.</p>
+            </div>
+            <div class="bill-analyzer-grid">
+                <div class="bill-upload-card">
+                    <div class="upload-area" id="billUploadArea">
+                        <div class="upload-icon">📄</div>
+                        <h3>Drop your electricity bill here</h3>
+                        <p>or click to upload (JPG, PNG, PDF)</p>
+                        <input type="file" id="billFileInput" accept="image/*,.pdf" hidden>
+                        <button class="btn btn-primary" id="billUploadBtn">Upload Bill</button>
+                    </div>
+                    <div class="upload-or">OR</div>
+                    <div class="manual-entry">
+                        <h4>Enter Consumer Number</h4>
+                        <div class="consumer-input-group">
+                            <select id="discomSelect" class="form-select">
+                                <option value="">Select DISCOM</option>
+                                <option value="MSEDCL">MSEDCL (Mahavitaran)</option>
+                                <option value="TATA_MUM">Tata Power Mumbai</option>
+                                <option value="ADANI_MUM">Adani Electricity</option>
+                                <option value="BESCOM">BESCOM (Karnataka)</option>
+                                <option value="TANGEDCO">TANGEDCO (Tamil Nadu)</option>
+                                <option value="TORRENT">Torrent Power</option>
+                            </select>
+                            <input type="text" id="consumerNumber" placeholder="Enter Consumer Number" class="form-input">
+                            <button class="btn btn-primary" id="fetchBillBtn">Fetch Bill →</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="bill-results-card hidden" id="billResults">
+                    <h3>📊 AI Analysis Results</h3>
+                    <div class="bill-data-grid">
+                        <div class="bill-data-item">
+                            <span class="bd-label">Monthly Units</span>
+                            <span class="bd-value" id="billUnits">-</span>
+                        </div>
+                        <div class="bill-data-item">
+                            <span class="bd-label">Monthly Bill</span>
+                            <span class="bd-value" id="billAmount">-</span>
+                        </div>
+                        <div class="bill-data-item">
+                            <span class="bd-label">Sanctioned Load</span>
+                            <span class="bd-value" id="billLoad">-</span>
+                        </div>
+                        <div class="bill-data-item">
+                            <span class="bd-label">Tariff Rate</span>
+                            <span class="bd-value" id="billTariff">-</span>
+                        </div>
+                    </div>
+                    <div class="bill-recommendation">
+                        <h4>☀️ Solar Recommendation</h4>
+                        <div class="bill-data-grid">
+                            <div class="bill-data-item highlight">
+                                <span class="bd-label">Recommended System</span>
+                                <span class="bd-value text-amber" id="recSystem">-</span>
+                            </div>
+                            <div class="bill-data-item highlight">
+                                <span class="bd-label">Annual Savings</span>
+                                <span class="bd-value text-green" id="recSavings">-</span>
+                            </div>
+                            <div class="bill-data-item highlight">
+                                <span class="bd-label">Subsidy Amount</span>
+                                <span class="bd-value text-green" id="recSubsidy">-</span>
+                            </div>
+                            <div class="bill-data-item highlight">
+                                <span class="bd-label">Payback Period</span>
+                                <span class="bd-value" id="recPayback">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/917350785606?text=Hi!%20I%20uploaded%20my%20bill.%20Please%20share%20a%20detailed%20quotation." class="btn btn-green btn-block" target="_blank">Get Detailed Quotation on WhatsApp →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== EMI CALCULATOR ===== -->
+    <section class="emi-section" id="emi">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag text-amber">Easy Financing</div>
+                <h2>Go Solar with <span class="text-green">Zero Upfront Cost</span></h2>
+                <p>EMI less than your current electricity bill. Start saving from Day 1.</p>
+            </div>
+            <div class="emi-grid">
+                <div class="emi-calculator-card">
+                    <h3>💰 EMI Calculator</h3>
+                    <div class="emi-input-group">
+                        <label>System Cost (after subsidy)</label>
+                        <input type="number" id="emiAmount" placeholder="e.g. 200000" value="200000" class="form-input">
+                    </div>
+                    <div class="emi-input-group">
+                        <label>Tenure</label>
+                        <div class="emi-tenure-options">
+                            <button class="tenure-btn active" data-months="12">12 mo</button>
+                            <button class="tenure-btn" data-months="24">24 mo</button>
+                            <button class="tenure-btn" data-months="36">36 mo</button>
+                            <button class="tenure-btn" data-months="48">48 mo</button>
+                            <button class="tenure-btn" data-months="60">60 mo</button>
+                        </div>
+                    </div>
+                    <div class="emi-result">
+                        <div class="emi-result-main">
+                            <span>Your Monthly EMI</span>
+                            <span class="emi-amount" id="emiResult">₹16,667</span>
+                        </div>
+                        <div class="emi-comparison">
+                            <div class="emi-vs">
+                                <span>Current Bill: <strong>₹5,000/mo</strong></span>
+                                <span>With Solar EMI: <strong class="text-green">₹0 bill + EMI</strong></span>
+                            </div>
+                            <p class="emi-note">💡 Your EMI replaces your electricity bill. After EMI ends, you save 100%!</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="emi-benefits-card">
+                    <h3>Why Solar EMI Makes Sense</h3>
+                    <div class="emi-benefit-list">
+                        <div class="emi-benefit-item">
+                            <span class="ebi-icon">✅</span>
+                            <div>
+                                <strong>0% EMI for 12 months</strong>
+                                <p>No interest for the first year</p>
+                            </div>
+                        </div>
+                        <div class="emi-benefit-item">
+                            <span class="ebi-icon">✅</span>
+                            <div>
+                                <strong>EMI < Your Current Bill</strong>
+                                <p>Pay less than what you're already paying</p>
+                            </div>
+                        </div>
+                        <div class="emi-benefit-item">
+                            <span class="ebi-icon">✅</span>
+                            <div>
+                                <strong>No Collateral Required</strong>
+                                <p>Easy approval with minimal documentation</p>
+                            </div>
+                        </div>
+                        <div class="emi-benefit-item">
+                            <span class="ebi-icon">✅</span>
+                            <div>
+                                <strong>25 Years of Free Electricity</strong>
+                                <p>After EMI ends, savings are 100% yours</p>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/917350785606?text=Hi!%20I%20want%20to%20know%20about%20solar%20EMI%20options." class="btn btn-primary btn-block" target="_blank">Check EMI Eligibility →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== SUBSIDY ELIGIBILITY CHECKER ===== -->
+    <section class="subsidy-checker-section" id="subsidy-check">
+        <div class="container">
+            <div class="subsidy-checker-card">
+                <div class="sc-content">
+                    <div class="section-tag text-green">PM Surya Ghar Yojana</div>
+                    <h2>Check Your <span class="text-amber">Subsidy Eligibility</span></h2>
+                    <p>Answer 3 simple questions to check if you qualify for government solar subsidy.</p>
+                    <div class="subsidy-quiz" id="subsidyQuiz">
+                        <div class="quiz-step active" data-step="1">
+                            <h4>1. What type of property do you have?</h4>
+                            <div class="quiz-options">
+                                <button class="quiz-option" data-value="residential" data-eligible="true">🏠 Residential House</button>
+                                <button class="quiz-option" data-value="society" data-eligible="true">🏢 Housing Society</button>
+                                <button class="quiz-option" data-value="commercial" data-eligible="false">🏭 Commercial/Industrial</button>
+                            </div>
+                        </div>
+                        <div class="quiz-step" data-step="2">
+                            <h4>2. Do you have an existing electricity connection?</h4>
+                            <div class="quiz-options">
+                                <button class="quiz-option" data-value="yes" data-eligible="true">✅ Yes, I have a connection</button>
+                                <button class="quiz-option" data-value="no" data-eligible="false">❌ No connection yet</button>
+                            </div>
+                        </div>
+                        <div class="quiz-step" data-step="3">
+                            <h4>3. What system size are you considering?</h4>
+                            <div class="quiz-options">
+                                <button class="quiz-option" data-value="1-2kw" data-subsidy="30000">1-2 kW (₹30,000/kW subsidy)</button>
+                                <button class="quiz-option" data-value="3kw" data-subsidy="78000">3 kW (₹78,000 subsidy)</button>
+                                <button class="quiz-option" data-value="3plus" data-subsidy="78000">3+ kW (₹78,000 max subsidy)</button>
+                            </div>
+                        </div>
+                        <div class="quiz-result hidden" id="subsidyResult">
+                            <div class="result-eligible">
+                                <div class="result-icon">🎉</div>
+                                <h3>You're Eligible!</h3>
+                                <p>You can get up to <strong class="text-green" id="subsidyAmount">₹78,000</strong> government subsidy.</p>
+                                <a href="https://wa.me/917350785606?text=Hi!%20I%20checked%20my%20subsidy%20eligibility.%20Please%20help%20me%20apply." class="btn btn-primary" target="_blank">Apply Now with Our Help →</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="sc-visual">
+                    <div class="subsidy-breakdown">
+                        <h4>Subsidy Breakdown</h4>
+                        <div class="sb-item"><span>1 kW</span><strong>₹30,000</strong></div>
+                        <div class="sb-item"><span>2 kW</span><strong>₹60,000</strong></div>
+                        <div class="sb-item"><span>3 kW</span><strong>₹78,000</strong></div>
+                        <div class="sb-item highlight"><span>3+ kW</span><strong>₹78,000 (max)</strong></div>
+                        <p class="sb-note">* Only for residential grid-connected systems</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== AI CHATBOT WIDGET ===== -->
+    <div class="ai-chatbot-widget" id="aiChatbot">
+        <button class="chatbot-toggle" id="chatbotToggle" aria-label="Open AI Solar Assistant">
+            <span class="chatbot-icon">🤖</span>
+            <span class="chatbot-label">AI Solar Expert</span>
+        </button>
+        <div class="chatbot-window hidden" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div class="chatbot-title">
+                    <span>🤖</span>
+                    <div>
+                        <strong>Solar AI Assistant</strong>
+                        <small>Ask anything about solar</small>
+                    </div>
+                </div>
+                <button class="chatbot-close" id="chatbotClose">✕</button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="chat-message bot">
+                    <p>Namaste! 🌞 I'm your AI Solar Assistant. I can help you with:</p>
+                    <div class="chat-quick-options">
+                        <button class="quick-option" data-msg="How much can I save with solar?">💰 Savings</button>
+                        <button class="quick-option" data-msg="What subsidy is available?">🏛️ Subsidy</button>
+                        <button class="quick-option" data-msg="What size system do I need?">☀️ System Size</button>
+                        <button class="quick-option" data-msg="How does net metering work?">📊 Net Metering</button>
+                        <button class="quick-option" data-msg="What are the EMI options?">💳 EMI Options</button>
+                    </div>
+                </div>
+            </div>
+            <div class="chatbot-input">
+                <input type="text" id="chatbotInput" placeholder="Ask about solar..." autocomplete="off">
+                <button id="chatbotSend" class="chatbot-send-btn">➤</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ===== CTA ===== -->
     <section class="cta">
         <div class="container">
@@ -860,5 +1113,6 @@
     </script>
 
     <script src="script.js"></script>
+    <script src="new-sections.js"></script>
 </body>
 </html>
